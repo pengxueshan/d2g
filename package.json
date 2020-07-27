@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/pengxueshan/d2g/issues"
   },
-  "homepage": "https://github.com/pengxueshan/d2g#readme"
+  "homepage": "https://github.com/pengxueshan/d2g#readme",
+  "dependencies": {
+    "lodash": "^4.17.19"
+  },
+  "devDependencies": {
+    "typescript": "^3.9.7"
+  }
 }

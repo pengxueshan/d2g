@@ -1,4 +1,4 @@
-export default function min(values: Iterable<Number>) {
+export default function min(values: Iterable<number>) {
   let min;
   for (const value of values) {
     if (value != null
