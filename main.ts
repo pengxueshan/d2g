@@ -1,19 +1,20 @@
-import config from './config';
 import _ from 'lodash';
+import config from './lib/config';
 import Chart from './lib/chart';
 import Pie from './lib/pie';
-import { Config, ChartInfo } from './lib/types';
+import Line from './lib/line';
+import XAxis from './lib/xaxis';
+import EventTypes from './utils/events';
 
 class D2G extends Chart {
   wrap = null;
-  canvas = null;
-  ctx = null;
-  config: Config = {};
-  chartInfo: ChartInfo = {};
-  chart = null;
+  chart = [];
+  originData = [];
+
+  windowIndex = [0, 0];
 
   constructor(options, selector) {
-    super();
+    super(options);
     this.init(options, selector);
   }
 
@@ -27,6 +28,7 @@ class D2G extends Chart {
     this.wrap = wrap;
     this.canvas = c;
     this.ctx = c.getContext('2d');
+    this.ctx.font = opts.font;
     const canvasWidth = this.transValue(opts.width);
     const canvasHeight = this.transValue(opts.height);
     c.setAttribute('width', canvasWidth + 'px');
@@ -48,14 +50,51 @@ class D2G extends Chart {
     const config = this.getGlobalConfig();
     switch (this.config.type) {
       case 'pie':
-        this.chart = new Pie(config);
+        this.chart.push(new Pie(config));
+        break;
+      case 'line':
+        this.chart.push(new XAxis(config));
+        this.chart.push(new Line(config));
         break;
     }
+    this.chart.forEach(c => {
+      c.on(EventTypes.UPDATE_CHART_INFO, this.handleUpdateChartInfo);
+    });
+  }
+
+  handleUpdateChartInfo = (info) => {
+    this.chartInfo = _.merge({}, this.chartInfo, info);
+    console.log(this.chartInfo);
   }
 
   setData(data) {
-    if (this.chart) {
-      this.chart.setData(data);
+    const { sort, sortKey } = this.config;
+    let tmpData = data.concat();
+    if (sort) {
+      tmpData.sort((a, b) => {
+        return a[sortKey] - b[sortKey];
+      });
+    }
+    this.originData = tmpData;
+    this.calcWindow();
+  }
+
+  calcWindow() {
+    const { window } = this.config;
+    if (!window) {
+      this.windowIndex = [0, this.originData.length - 1];
+    } else if (window <= 1) {
+      const num = Math.floor(this.originData.length * window);
+      this.windowIndex[1] = this.windowIndex[0] + num;
+    } else {
+      this.windowIndex[1] = this.windowIndex[0] + window;
+    }
+    if (this.windowIndex[1] > this.originData.length - 1) {
+      this.windowIndex[1] = this.originData.length - 1;
+    }
+    if (this.chart.length) {
+      const data = this.originData.slice(this.windowIndex[0], this.windowIndex[1] + 1);
+      this.chart.forEach(c => c.setData(data));
     }
   }
 
@@ -69,8 +108,8 @@ class D2G extends Chart {
   }
 
   render() {
-    if (this.chart) {
-      this.chart.render();
+    if (this.chart.length) {
+      this.chart.forEach(c => c.render());
     }
   }
 }

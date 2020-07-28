@@ -1,12 +1,24 @@
-class Chart {
+import { EventEmitter } from 'events';
+import { Config, ChartInfo } from '../utils/types';
+import { v4 } from 'uuid';
+
+class Chart extends EventEmitter {
+  id = '';
   ratio = 1;
   textLineHeight = 12;
   fontSize = 12;
+  canvas = null;
+  ctx = null;
+  config: Config = {};
+  chartInfo: ChartInfo = {};
 
-  constructor({ fontSize = 12 } = {}) {
+  constructor({ font = '12pt' } = {}) {
+    super();
+    this.id = v4();
     this.ratio = window.devicePixelRatio || 1;
+    const fontSize = parseInt(font.match(/\d+/).join(), 10);
     this.fontSize = fontSize;
-    this.textLineHeight = this.ratio * fontSize;
+    this.textLineHeight = this.transValue(fontSize);
   }
 
   transValue(v, isToReal = true) {

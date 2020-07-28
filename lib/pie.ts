@@ -1,14 +1,9 @@
-import Chart from './chart';
-import { Config } from './types';
-import colors from './colors.json';
-import sum from './sum';
 import _ from 'lodash';
+import Chart from './chart';
+import colors from '../utils/colors.json';
+import sum from '../utils/sum';
 
 class Pie extends Chart {
-  canvas = null;
-  ctx = null;
-  config: Config = {};
-  chartInfo = null;
   outerRadius = 0;
   innerRadius = 0;
   labelRadius = 0;
@@ -47,13 +42,13 @@ class Pie extends Chart {
   }
 
   setData(data) {
-    this.data = this.formatPieData(data);
+    this.data = this.formatData(data);
     this.render();
   }
 
-  formatPieData(data) {
+  formatData(data) {
     const total = sum(data, 'value');
-    const {pie} = this.config;
+    const { pie, sort } = this.config;
     let ret = data.map(d => {
       let label = d.label;
       const percent = d.value / total;
@@ -66,9 +61,6 @@ class Pie extends Chart {
         label
       };
     });
-    if (pie.sort) {
-      ret.sort((a, b) => a.percent - b.percent);
-    }
     return ret;
   }
 

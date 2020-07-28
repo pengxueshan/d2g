@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/pengxueshan/d2g#readme",
   "dependencies": {
-    "lodash": "^4.17.19"
+    "events": "^3.2.0",
+    "lodash": "^4.17.19",
+    "uuid": "^8.3.0"
   },
   "devDependencies": {
     "typescript": "^3.9.7"
