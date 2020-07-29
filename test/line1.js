@@ -7,6 +7,11 @@ document.querySelector('#app').appendChild(wrap);
 const chart = new D2G({
   type: 'line',
   sortKey: 'date',
+  xAxis: {
+    tick: {
+      num: 3
+    }
+  }
 }, '#line1');
 chart.setData([
   { value: 1, date: '2011' },

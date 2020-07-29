@@ -42,7 +42,7 @@ export default {
     },
     tick: {
       show: true,
-      num: 3,
+      num: 2,
       len: 5,
       color: colors.black, // or function
     },
@@ -57,6 +57,9 @@ export default {
     mode: 'outside', // inside
     color: colors.black,
     lineWidth: 1,
+    padding: {
+      left: 5
+    },
     label: {
       show: true,
       color: colors.black, // or function
@@ -65,7 +68,7 @@ export default {
     },
     tick: {
       show: true,
-      num: 3,
+      num: 2,
       len: 5,
       color: colors.black, // or function
     },

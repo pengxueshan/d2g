@@ -1,5 +1,5 @@
-export default function min(values, key) {
-  let min;
+export default function max(values, key?) {
+  let max;
   for (let i = 0; i < values.length; i++) {
     let v;
     if (key) {
@@ -8,9 +8,9 @@ export default function min(values, key) {
       v = values[i];
     }
     if (v === null || v === undefined) continue;
-    if (min === undefined || v < min) {
-      min = v;
+    if (max === undefined || v > max) {
+      max = v;
     }
   }
-  return min;
+  return max;
 }

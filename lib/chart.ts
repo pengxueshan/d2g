@@ -8,7 +8,7 @@ class Chart extends EventEmitter {
   textLineHeight = 12;
   fontSize = 12;
   canvas = null;
-  ctx = null;
+  ctx: CanvasRenderingContext2D = null;
   config: Config = {};
   chartInfo: ChartInfo = {};
 
@@ -34,6 +34,10 @@ class Chart extends EventEmitter {
    */
   checkIsCover(dest, src) {
     return !(src[2] >= dest[3] || src[3] <= dest[2] || src[0] >= dest[1] || src[1] <= dest[0]);
+  }
+
+  setChartInfo(info) {
+    this.chartInfo = info;
   }
 }
 

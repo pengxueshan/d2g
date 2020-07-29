@@ -4,6 +4,7 @@ import Chart from './lib/chart';
 import Pie from './lib/pie';
 import Line from './lib/line';
 import XAxis from './lib/xaxis';
+import YAxis from './lib/yaxis';
 import EventTypes from './utils/events';
 
 class D2G extends Chart {
@@ -54,6 +55,7 @@ class D2G extends Chart {
         break;
       case 'line':
         this.chart.push(new XAxis(config));
+        this.chart.push(new YAxis(config));
         this.chart.push(new Line(config));
         break;
     }
@@ -62,9 +64,15 @@ class D2G extends Chart {
     });
   }
 
-  handleUpdateChartInfo = (info) => {
+  handleUpdateChartInfo = (info, id) => {
     this.chartInfo = _.merge({}, this.chartInfo, info);
-    console.log(this.chartInfo);
+    this.chart.forEach(c => {
+      if (c.id === id) return;
+      c.setChartInfo(this.chartInfo);
+      if (typeof c.calcDimensions === 'function') {
+        c.calcDimensions();
+      }
+    });
   }
 
   setData(data) {

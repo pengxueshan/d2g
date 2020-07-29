@@ -50,7 +50,7 @@ interface Section {
 
 interface AxisLabel {
   show: boolean;
-  color: string;
+  color: string | Function;
   format: null | Function | string;
   offset: number;
 }
@@ -59,7 +59,7 @@ interface AxisTick {
   show: boolean;
   num: number;
   len: number;
-  color: string;
+  color: string | Function;
 }
 
 interface AxisGrid {
@@ -76,6 +76,7 @@ interface Padding {
 
 interface XAxis {
   show: boolean;
+  position: string;
   scalable: boolean;
   key: string;
   sort: boolean;

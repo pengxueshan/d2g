@@ -2,6 +2,8 @@ import _ from 'lodash';
 import Chart from './chart';
 import EventTypes from '../utils/events';
 import pick from '../utils/pick';
+import minmax from '../utils/minmax';
+import max from '../utils/max';
 
 class YAxis extends Chart {
   data = [];
@@ -11,6 +13,8 @@ class YAxis extends Chart {
     width: 0,
     height: 0
   };
+  labels = [];
+  range = [];
 
   constructor(config) {
     super();
@@ -31,7 +35,8 @@ class YAxis extends Chart {
 
   setData(data) {
     this.data = data;
-    this.render();
+    this.calcLabels();
+    this.calcDimensions();
   }
 
   formatData(data) {
@@ -39,28 +44,42 @@ class YAxis extends Chart {
   }
 
   calcWidth() {
-    const { xAxis } = this.config;
-    let height = 0;
-    height += this.transValue(xAxis.lineWidth < 1 ? 1 : xAxis.lineWidth);
-    if (xAxis.tick.show) {
-      height += this.transValue(xAxis.tick.len);
+    const { yAxis } = this.config;
+    let width = 0;
+    width += this.transValue(yAxis.lineWidth < 1 ? 1 : yAxis.lineWidth);
+    if (yAxis.tick.show) {
+      width += this.transValue(yAxis.tick.len);
     }
-    if (xAxis.label.show) {
-      height += this.textLineHeight;
-      height += this.transValue(xAxis.label.offset);
+    if (yAxis.label.show) {
+      const labelWidths = this.labels.map(v => {
+        const t = v.formated !== undefined ? v.formated : v.label;
+        return this.ctx.measureText(t).width;
+      });
+      width += max(labelWidths) || 0;
+      width += this.transValue(yAxis.label.offset);
     }
-    if (xAxis.padding.top) {
-      height += this.transValue(xAxis.padding.top);
+    if (yAxis.padding.left) {
+      width += this.transValue(yAxis.padding.left);
     }
-    if (xAxis.padding.bottom) {
-      height += this.transValue(xAxis.padding.bottom);
+    if (yAxis.padding.right) {
+      width += this.transValue(yAxis.padding.right);
     }
-    this.emit(EventTypes.UPDATE_CHART_INFO, {
-      [this.id]: {
-        height
-      }
-    });
-    this.dimensions.height = height;
+    let x;
+    if (yAxis.position === 'left') {
+      x = 0;
+    } else {
+      x = this.chartInfo.width - width;
+    }
+    if (width !== this.dimensions.width || x !== this.dimensions.x) {
+      this.dimensions.width = width;
+      this.dimensions.x = x;
+      this.emit(EventTypes.UPDATE_CHART_INFO, {
+        [this.id]: {
+          width,
+          x
+        }
+      }, this.id);
+    }
   }
 
   calcHeight() {
@@ -68,7 +87,8 @@ class YAxis extends Chart {
     let arr = [];
     let { width, height, ...rest } = this.chartInfo;
     let keys = Object.keys(rest);
-    for (const key in keys) {
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
       if (key !== this.id) {
         arr.push(this.chartInfo[key]);
       }
@@ -78,6 +98,29 @@ class YAxis extends Chart {
     const d = pick(arr, 0, this.chartInfo.height);
     this.dimensions.y = d[0];
     this.dimensions.height = d[1] - d[0];
+  }
+
+  calcLabels() {
+    const [min, max] = minmax(this.data, 'value');
+    this.range = [min, max];
+    const { yAxis } = this.config;
+    const num = yAxis.tick.num < 2 ? 2 : yAxis.tick.num;
+    const interval = (max - min) / (num - 1);
+    this.labels = [];
+    while (this.labels.length < num) {
+      let v = min + this.labels.length * interval;
+      if (v > max) {
+        v = max;
+      }
+      let formated = v;
+      if (typeof yAxis.label.format === 'function') {
+        formated = yAxis.label.format(v);
+      }
+      this.labels.push({
+        label: v.toFixed(2),
+        formated: formated
+      });
+    }
   }
 
   calcDimensions() {
@@ -91,15 +134,38 @@ class YAxis extends Chart {
     }
     this.calcHeight();
     this.calcWidth();
+    this.render();
   }
 
   calcBand() { }
 
-  renderXAxis() { }
-
-  render() {
-    this.calcDimensions();
+  renderLine() {
+    const {x, y, width, height} = this.dimensions;
+    const {yAxis} = this.config;
+    let lineX;
+    if (yAxis.position === 'left') {
+      lineX = x + width - this.transValue(yAxis.lineWidth);
+    } else {
+      lineX = x;
+    }
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.moveTo(lineX, y);
+    this.ctx.lineCap = 'square';
+    this.ctx.lineTo(lineX, y + height);
+    this.ctx.lineWidth = this.transValue(yAxis.lineWidth);
+    this.ctx.strokeStyle = yAxis.color;
+    this.ctx.stroke();
+    this.ctx.restore();
   }
+
+  _render() {
+    const {x, y, width, height} = this.dimensions;
+    this.ctx.clearRect(x, y, width, height);
+    this.renderLine();
+  }
+
+  render = _.debounce(this._render, 300);
 }
 
 export default YAxis;
