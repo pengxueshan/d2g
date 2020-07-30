@@ -4,6 +4,7 @@ import EventTypes from '../utils/events';
 import pick from '../utils/pick';
 import minmax from '../utils/minmax';
 import max from '../utils/max';
+import { YAxis as YAxisConfig } from '../utils/types';
 
 class YAxis extends Chart {
   data = [];
@@ -15,6 +16,7 @@ class YAxis extends Chart {
   };
   labels = [];
   range = [];
+  config: YAxisConfig = {};
 
   constructor(config) {
     super();
@@ -44,25 +46,27 @@ class YAxis extends Chart {
   }
 
   calcWidth() {
-    const { yAxis } = this.config;
+    const yAxis = this.config;
     let width = 0;
-    width += this.transValue(yAxis.lineWidth < 1 ? 1 : yAxis.lineWidth);
-    if (yAxis.tick.show) {
-      width += this.transValue(yAxis.tick.len);
-    }
-    if (yAxis.label.show) {
-      const labelWidths = this.labels.map(v => {
-        const t = v.formated !== undefined ? v.formated : v.label;
-        return this.ctx.measureText(t).width;
-      });
-      width += max(labelWidths) || 0;
-      width += this.transValue(yAxis.label.offset);
-    }
-    if (yAxis.padding.left) {
-      width += this.transValue(yAxis.padding.left);
-    }
-    if (yAxis.padding.right) {
-      width += this.transValue(yAxis.padding.right);
+    if (yAxis.show) {
+      width += this.transValue(yAxis.lineWidth < 1 ? 1 : yAxis.lineWidth);
+      if (yAxis.tick.show) {
+        width += this.transValue(yAxis.tick.len);
+      }
+      if (yAxis.label.show) {
+        const labelWidths = this.labels.map(v => {
+          const t = v.formated !== undefined ? v.formated : v.label;
+          return this.ctx.measureText(t).width;
+        });
+        width += max(labelWidths) || 0;
+        width += this.transValue(yAxis.label.offset);
+      }
+      if (yAxis.padding.left) {
+        width += this.transValue(yAxis.padding.left);
+      }
+      if (yAxis.padding.right) {
+        width += this.transValue(yAxis.padding.right);
+      }
     }
     let x;
     if (yAxis.position === 'left') {
@@ -83,7 +87,6 @@ class YAxis extends Chart {
   }
 
   calcHeight() {
-    const { yAxis } = this.config;
     let arr = [];
     let { width, height, ...rest } = this.chartInfo;
     let keys = Object.keys(rest);
@@ -101,9 +104,12 @@ class YAxis extends Chart {
   }
 
   calcLabels() {
-    const [min, max] = minmax(this.data, 'value');
+    let [min, max] = minmax(_.flatten(this.data), 'value');
+    const yAxis = this.config;
+    const total = max - min;
+    min = min - total * yAxis.dataPadding;
+    max = max + total * yAxis.dataPadding;
     this.range = [min, max];
-    const { yAxis } = this.config;
     const num = yAxis.tick.num < 2 ? 2 : yAxis.tick.num;
     const interval = (max - min) / (num - 1);
     this.labels = [];
@@ -112,26 +118,18 @@ class YAxis extends Chart {
       if (v > max) {
         v = max;
       }
-      let formated = v;
+      let formated = v.toFixed(2);
       if (typeof yAxis.label.format === 'function') {
         formated = yAxis.label.format(v);
       }
       this.labels.push({
         label: v.toFixed(2),
-        formated: formated
+        formated
       });
     }
   }
 
   calcDimensions() {
-    const { yAxis } = this.config;
-    if (!yAxis.show) {
-      this.dimensions.x = 0;
-      this.dimensions.y = 0;
-      this.dimensions.width = 0;
-      this.dimensions.height = 0;
-      return;
-    }
     this.calcHeight();
     this.calcWidth();
     this.render();
@@ -140,18 +138,17 @@ class YAxis extends Chart {
   calcBand() { }
 
   renderLine() {
-    const {x, y, width, height} = this.dimensions;
-    const {yAxis} = this.config;
+    const { x, y, width, height } = this.dimensions;
+    const yAxis = this.config;
     let lineX;
     if (yAxis.position === 'left') {
-      lineX = x + width - this.transValue(yAxis.lineWidth);
+      lineX = x + width;
     } else {
       lineX = x;
     }
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.moveTo(lineX, y);
-    this.ctx.lineCap = 'square';
     this.ctx.lineTo(lineX, y + height);
     this.ctx.lineWidth = this.transValue(yAxis.lineWidth);
     this.ctx.strokeStyle = yAxis.color;
@@ -159,10 +156,78 @@ class YAxis extends Chart {
     this.ctx.restore();
   }
 
+  renderLabel() {
+    const yAxis = this.config;
+    if (!yAxis.label.show && !yAxis.tick.show) return;
+    this.labels.forEach((label, index) => {
+      const p = this.point(null, +label.formated || +label.label, true);
+      let tickX;
+      let labelX;
+      if (yAxis.position === 'left') {
+        tickX = this.dimensions.x + this.dimensions.width - this.transValue(yAxis.tick.len);
+        labelX = this.dimensions.x + this.dimensions.width;
+      } else {
+        tickX = this.dimensions.x;
+        labelX = this.dimensions.x;
+      }
+      this.renderTick({ x: tickX, y: p.y }, label);
+      this.renderLabelText({ x: labelX, y: p.y }, label, index);
+    });
+  }
+
+  renderTick(point, label) {
+    const yAxis = this.config;
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.moveTo(point.x, point.y);
+    this.ctx.lineTo(point.x + this.transValue(yAxis.tick.len), point.y);
+    if (typeof yAxis.tick.color === 'function') {
+      this.ctx.strokeStyle = yAxis.tick.color(label);
+    } else {
+      this.ctx.strokeStyle = yAxis.tick.color;
+    }
+    this.ctx.stroke();
+    this.ctx.restore();
+  }
+
+  renderLabelText(point, label, index) {
+    const yAxis = this.config;
+    this.ctx.save();
+    if (index === 0) {
+      this.ctx.textBaseline = 'bottom';
+    } else if (index === this.labels.length - 1) {
+      this.ctx.textBaseline = 'top';
+    } else {
+      this.ctx.textBaseline = 'middle';
+    }
+    let x = point.x;
+    if (yAxis.position === 'left') {
+      this.ctx.textAlign = 'end';
+      x = x - this.transValue(yAxis.label.offset);
+      if (yAxis.tick.show) {
+        x = x - this.transValue(yAxis.tick.len);
+      }
+    } else {
+      this.ctx.textAlign = 'start';
+      x = x + this.transValue(yAxis.label.offset);
+      if (yAxis.tick.show) {
+        x = x + this.transValue(yAxis.tick.len);
+      }
+    }
+    if (typeof yAxis.label.color === 'function') {
+      this.ctx.fillStyle = yAxis.label.color(label);
+    } else {
+      this.ctx.fillStyle = yAxis.label.color;
+    }
+    this.ctx.fillText(label.formated || label.label, x, point.y);
+    this.ctx.restore();
+  }
+
   _render() {
-    const {x, y, width, height} = this.dimensions;
+    const { x, y, width, height } = this.dimensions;
     this.ctx.clearRect(x, y, width, height);
     this.renderLine();
+    this.renderLabel();
   }
 
   render = _.debounce(this._render, 300);

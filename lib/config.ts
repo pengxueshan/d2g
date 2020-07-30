@@ -23,7 +23,7 @@ export default {
     totalAngle: 2 * Math.PI,
     animation: false
   },
-  xAxis: {
+  xAxis: [{
     show: true,
     position: 'bottom',
     mode: 'outside', // inside
@@ -50,8 +50,8 @@ export default {
       show: false,
       color: colors.gray, // or function
     }
-  },
-  yAxis: {
+  }],
+  yAxis: [{
     show: true,
     position: 'left',
     mode: 'outside', // inside
@@ -60,6 +60,7 @@ export default {
     padding: {
       left: 5
     },
+    dataPadding: 0.1,
     label: {
       show: true,
       color: colors.black, // or function
@@ -76,5 +77,15 @@ export default {
       show: false,
       color: colors.gray, // or function
     }
-  },
+  }],
+  line: [
+    {
+      color: 'red',
+      width: 1,
+      area: {
+        show: true,
+        color: ['rgba(255,0,0,0.6)', 'rgba(255,0,0,0.3)']
+      }
+    }
+  ]
 }

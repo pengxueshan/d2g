@@ -2,6 +2,7 @@ import _ from 'lodash';
 import Chart from './chart';
 import EventTypes from '../utils/events';
 import pick from '../utils/pick';
+import { XAxis as XAxisConfig } from '../utils/types';
 
 class XAxis extends Chart {
   data = [];
@@ -12,6 +13,7 @@ class XAxis extends Chart {
     height: 0
   };
   band = 0;
+  config: XAxisConfig = {};
 
   constructor(config) {
     super();
@@ -40,21 +42,23 @@ class XAxis extends Chart {
   }
 
   calcHeight() {
-    const { xAxis } = this.config;
+    const xAxis = this.config;
     let height = 0;
-    height += this.transValue(xAxis.lineWidth < 1 ? 1 : xAxis.lineWidth);
-    if (xAxis.tick.show) {
-      height += this.transValue(xAxis.tick.len);
-    }
-    if (xAxis.label.show) {
-      height += this.textLineHeight;
-      height += this.transValue(xAxis.label.offset);
-    }
-    if (xAxis.padding.top) {
-      height += this.transValue(xAxis.padding.top);
-    }
-    if (xAxis.padding.bottom) {
-      height += this.transValue(xAxis.padding.bottom);
+    if (xAxis.show) {
+      height += this.transValue(xAxis.lineWidth < 1 ? 1 : xAxis.lineWidth);
+      if (xAxis.tick.show) {
+        height += this.transValue(xAxis.tick.len);
+      }
+      if (xAxis.label.show) {
+        height += this.textLineHeight;
+        height += this.transValue(xAxis.label.offset);
+      }
+      if (xAxis.padding.top) {
+        height += this.transValue(xAxis.padding.top);
+      }
+      if (xAxis.padding.bottom) {
+        height += this.transValue(xAxis.padding.bottom);
+      }
     }
     let y;
     if (xAxis.position === 'bottom') {
@@ -75,14 +79,6 @@ class XAxis extends Chart {
   }
 
   calcDimensions() {
-    const { xAxis } = this.config;
-    if (!xAxis.show) {
-      this.dimensions.x = 0;
-      this.dimensions.y = 0;
-      this.dimensions.width = 0;
-      this.dimensions.height = 0;
-      return;
-    }
     this.calcHeight();
     let arr = [];
     let { width, height, ...rest } = this.chartInfo;
@@ -103,16 +99,16 @@ class XAxis extends Chart {
   }
 
   calcBand() {
-    this.band = this.dimensions.width / ((this.data.length || 2) - 1);
+    let len = (this.data[0] && this.data[0].length) || 2;
+    this.band = this.dimensions.width / (len - 1);
   }
 
   renderLine() {
-    const { xAxis } = this.config;
+    const xAxis = this.config;
     const { x, y, width } = this.dimensions;
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.moveTo(x, y);
-    // this.ctx.lineCap = 'square';
     this.ctx.lineTo(x + width, y);
     this.ctx.strokeStyle = xAxis.color;
     this.ctx.lineWidth = this.transValue(xAxis.lineWidth);
@@ -121,60 +117,54 @@ class XAxis extends Chart {
   }
 
   renderLabel() {
-    const { xAxis } = this.config;
+    const xAxis = this.config;
     if (!xAxis.label.show && !xAxis.tick.show) return;
     let num = xAxis.tick.num;
     if (xAxis.tick.num < 2) {
       num = 2;
-    } else if (xAxis.tick.num > this.data.length) {
-      num = this.data.length + 1;
+    } else if (xAxis.tick.num > this.data[0].length) {
+      num = this.data[0].length + 1;
     }
-    const interval = Math.floor(this.data.length / (num - 1));
-    this.data.forEach((d, index) => {
-      if (index % interval === 0 || index === this.data.length - 1) {
-        if (xAxis.tick.show) {
-          this.renderTick(d, index);
+    const interval = Math.floor(this.data[0].length / (num - 1));
+    this.data.forEach(data => {
+      data.forEach((d, index) => {
+        if (index % interval === 0 || index === data.length - 1) {
+          if (xAxis.tick.show) {
+            this.renderTick(d, index);
+          }
+          if (xAxis.label.show) {
+            this.renderLabelText(d, index);
+          }
         }
-        if (xAxis.label.show) {
-          this.renderLabelText(d, index);
-        }
-      }
+      });
     });
   }
 
   renderTick(data, index) {
-    const { xAxis } = this.config;
+    const xAxis = this.config;
     const { x, y } = this.dimensions;
-    let delta = 0;
-    if (index === 0) {
-      delta = this.transValue(xAxis.lineWidth);
-    } else if (index === this.data.length - 1) {
-      delta = -this.transValue(xAxis.lineWidth);
-    }
     this.ctx.save();
     this.ctx.beginPath();
-    this.ctx.moveTo(x + index * this.band + delta, y);
-    this.ctx.lineCap = 'square';
-    this.ctx.lineTo(x + index * this.band + delta, y + this.transValue(xAxis.tick.len));
+    this.ctx.moveTo(x + index * this.band, y);
+    this.ctx.lineTo(x + index * this.band, y + this.transValue(xAxis.tick.len));
     let strokeStyle;
     if (typeof xAxis.tick.color === 'function') {
       strokeStyle = xAxis.tick.color(data);
     } else {
       strokeStyle = xAxis.tick.color;
     }
-    this.ctx.lineWidth = this.transValue(xAxis.lineWidth);
     this.ctx.strokeStyle = strokeStyle;
     this.ctx.stroke();
     this.ctx.restore();
   }
 
   renderLabelText(data, index) {
-    const { xAxis } = this.config;
+    const xAxis = this.config;
     const { x, y } = this.dimensions;
     let textAlign = 'center';
     if (index === 0) {
       textAlign = 'left';
-    } else if (index === this.data.length - 1) {
+    } else if (index === this.data[0].length - 1) {
       textAlign = 'right';
     }
     this.ctx.save();
@@ -202,8 +192,11 @@ class XAxis extends Chart {
   _render() {
     const { x, y, width, height } = this.dimensions;
     this.ctx.clearRect(x, y, width, height);
-    this.renderLine();
-    this.renderLabel();
+    const xAxis = this.config;
+    if (this.data.length && xAxis.show) {
+      this.renderLine();
+      this.renderLabel();
+    }
   }
 
   render = _.debounce(this._render, 300);

@@ -6,6 +6,7 @@ import Line from './lib/line';
 import XAxis from './lib/xaxis';
 import YAxis from './lib/yaxis';
 import EventTypes from './utils/events';
+import max from './utils/max';
 
 class D2G extends Chart {
   wrap = null;
@@ -54,9 +55,25 @@ class D2G extends Chart {
         this.chart.push(new Pie(config));
         break;
       case 'line':
-        this.chart.push(new XAxis(config));
-        this.chart.push(new YAxis(config));
-        this.chart.push(new Line(config));
+        const { config: c, ...rest } = config;
+        const { xAxis, yAxis } = c;
+        const xCharts = xAxis.map(x => {
+          const c = new XAxis({
+            config: x,
+            ...rest
+          });
+          this.chart.push(c);
+          return c;
+        });
+        const yCharts = yAxis.map(y => {
+          const c = new YAxis({
+            config: y,
+            ...rest
+          });
+          this.chart.push(c);
+          return c;
+        });
+        this.chart.push(new Line(config, xCharts, yCharts));
         break;
     }
     this.chart.forEach(c => {
@@ -78,10 +95,30 @@ class D2G extends Chart {
   setData(data) {
     const { sort, sortKey } = this.config;
     let tmpData = data.concat();
-    if (sort) {
-      tmpData.sort((a, b) => {
-        return a[sortKey] - b[sortKey];
-      });
+    if (!Array.isArray(tmpData[0])) {
+      tmpData = [tmpData];
+    }
+    if (sort || tmpData.length > 1) {
+      if (tmpData.length === 1) {
+        tmpData.forEach(d => {
+          d.sort((a, b) => {
+            return a[sortKey] - b[sortKey];
+          });
+        });
+      } else {
+        let keys = tmpData.map(d => {
+          return d[sortKey];
+        });
+        keys = _.flatten(keys);
+        keys = _.uniq(keys);
+        keys.sort((a, b) => a - b);
+        tmpData.map(d => {
+          return keys.map(k => {
+            let f = d.find(item => item[sortKey] === k);
+            return f || { [sortKey]: k };
+          });
+        });
+      }
     }
     this.originData = tmpData;
     this.calcWindow();
@@ -90,18 +127,18 @@ class D2G extends Chart {
   calcWindow() {
     const { window } = this.config;
     if (!window) {
-      this.windowIndex = [0, this.originData.length - 1];
+      this.windowIndex = [0, this.originData[0].length - 1];
     } else if (window <= 1) {
-      const num = Math.floor(this.originData.length * window);
+      const num = Math.floor(this.originData[0].length * window);
       this.windowIndex[1] = this.windowIndex[0] + num;
     } else {
       this.windowIndex[1] = this.windowIndex[0] + window;
     }
-    if (this.windowIndex[1] > this.originData.length - 1) {
-      this.windowIndex[1] = this.originData.length - 1;
+    if (this.windowIndex[1] > this.originData[0].length - 1) {
+      this.windowIndex[1] = this.originData[0].length - 1;
     }
     if (this.chart.length) {
-      const data = this.originData.slice(this.windowIndex[0], this.windowIndex[1] + 1);
+      const data = this.originData.map(d => d.slice(this.windowIndex[0], this.windowIndex[1] + 1));
       this.chart.forEach(c => c.setData(data));
     }
   }

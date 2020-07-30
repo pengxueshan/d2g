@@ -42,7 +42,7 @@ class Pie extends Chart {
   }
 
   setData(data) {
-    this.data = this.formatData(data);
+    this.data = this.formatData(data[0]);
     this.render();
   }
 

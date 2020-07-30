@@ -1,12 +1,22 @@
+import _ from 'lodash';
 import Chart from './chart';
-import EventTypes from '../utils/events';
+import pick from '../utils/pick';
 
 class Line extends Chart {
   data = [];
-  windowIndex = [0, 0];
+  xAxis: Array<Chart> = null;
+  yAxis: Array<Chart> = null;
+  dimensions = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0
+  };
 
-  constructor(config) {
+  constructor(config, xAxis, yAxis) {
     super();
+    this.xAxis = xAxis;
+    this.yAxis = yAxis;
     this.init(config);
   }
 
@@ -18,7 +28,9 @@ class Line extends Chart {
     this.setConfig(config);
   }
 
-  setConfig(c) { }
+  setConfig(c = {}) {
+    this.config = _.merge({}, this.config, c);
+  }
 
   setData(data) {
     this.data = data;
@@ -26,64 +38,125 @@ class Line extends Chart {
   }
 
   formatData(data) {
-    const { xAxis } = this.config;
-    let tmpData = data.concat();
-    if (xAxis.sort) {
-      const key = xAxis.key;
-      tmpData.sort((a, b) => {
-        return a[key] - b[key];
-      });
-    }
-    this.data = tmpData;
-    this.calcWindow();
   }
 
-  calcWindow() {
-    const { xAxis } = this.config;
-    if (!xAxis.window) {
-      this.windowIndex = [0, this.data.length - 1];
-    } else if (xAxis.window <= 1) {
-      const num = Math.floor(this.data.length * xAxis.window);
-      this.windowIndex[1] = this.windowIndex[0] + num;
-    } else {
-      this.windowIndex[1] = this.windowIndex[0] + xAxis.window;
-    }
-    if (this.windowIndex[1] > this.data.length - 1) {
-      this.windowIndex[1] = this.data.length - 1;
-    }
-  }
-
-  calcXAxisHeight() {
-    const { xAxis } = this.config;
-    if (!xAxis.show) return 0;
-    let height = 0;
-    height += this.transValue(xAxis.lineWidth < 1 ? 1 : xAxis.lineWidth);
-    if (xAxis.tick.show) {
-      height += this.transValue(xAxis.tick.len);
-    }
-    if (xAxis.label.show) {
-      height += this.textLineHeight;
-      height += this.transValue(xAxis.label.offset);
-    }
-    if (xAxis.padding.top) {
-      height += this.transValue(xAxis.padding.top);
-    }
-    if (xAxis.padding.bottom) {
-      height += this.transValue(xAxis.padding.bottom);
-    }
-    this.emit(EventTypes.UPDATE_CHART_INFO, {
-      xAxis: {
-        height
+  calcDimensions() {
+    let arr = [];
+    let { width, height, ...rest } = this.chartInfo;
+    let keys = Object.keys(rest);
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+      if (key !== this.id) {
+        arr.push(this.chartInfo[key]);
       }
-    });
-    return height;
+    }
+    let xarr = arr.filter(d => d.x !== undefined);
+    xarr.sort((a, b) => a.x - b.x);
+    xarr = xarr.map(v => [v.x, v.x + v.width]);
+    const xd = pick(xarr, 0, width);
+    this.dimensions.x = xd[0];
+    this.dimensions.width = xd[1] - xd[0];
+    let yarr = arr.filter(d => d.y !== undefined);
+    yarr.sort((a, b) => a.y - b.y);
+    yarr = yarr.map(v => [v.y, v.x + v.height]);
+    const yd = pick(yarr, 0, height);
+    this.dimensions.y = yd[0];
+    this.dimensions.height = yd[1] - yd[0];
+    this.render();
   }
 
-  calcBand() { }
+  renderLine() {
+    const { xAxis, line } = this.config;
+    let prevLineConfig;
+    this.data.forEach((data, index) => {
+      const points = data.map(d => {
+        let x = 0;
+        if (this.xAxis[0]) {
+          x = this.xAxis[0].point(data, d[xAxis[0].key], false, xAxis[0].key).x;
+        }
+        let y = 0;
+        if (this.yAxis[0]) {
+          y = this.yAxis[0].point(data, d.value, true).y;
+        }
+        return { x, y };
+      });
+      const xpoints = points.map(p => p.x);
+      const ypoints = points.map(p => p.y);
+      const px = this.getCtrlPoint2(xpoints);
+      const py = this.getCtrlPoint2(ypoints);
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.moveTo(points[0].x, points[0].y);
+      let minY = points[0].y;
+      if (points.length === 2) {
+        this.ctx.lineTo(points[1].x, points[1].y);
+        minY = Math.min(minY, points[1].y);
+      } else if (points.length > 2) {
+        for (var i0 = 0, i1 = 1; i1 < points.length; ++i0, ++i1) {
+          this.ctx.bezierCurveTo(px[0][i0], py[0][i0], px[1][i0], py[1][i0], xpoints[i1], ypoints[i1]);
+          minY = Math.min(minY, py[0][i0], py[1][i0], ypoints[i1]);
+        }
+      }
+      let conf = line[index] || prevLineConfig;
+      prevLineConfig = line[index];
+      this.ctx.strokeStyle = conf.color;
+      this.ctx.lineWidth = this.transValue(conf.width);
+      this.ctx.stroke();
+      if (conf.area.show) {
+        const { x, y, width, height } = this.dimensions;
+        this.ctx.lineTo(x + width, y + height);
+        this.ctx.lineTo(x, y + height);
+        this.ctx.closePath();
+        if (Array.isArray(conf.area.color)) {
+          if (conf.area.color.length < 2) {
+            this.ctx.fillStyle = conf.area.color[0];
+          } else {
+            const grd = this.ctx.createLinearGradient(
+              0,
+              minY,
+              0,
+              this.dimensions.y + this.dimensions.height
+            );
+            let interval = 1 / (conf.area.color.length - 1);
+            conf.area.color.forEach((color, index) => {
+              grd.addColorStop(interval * index, color);
+            });
+            this.ctx.fillStyle = grd;
+          }
+        } else {
+          this.ctx.fillStyle = conf.area.color;
+        }
+        this.ctx.fill();
+      }
+      this.ctx.restore();
+    });
+  }
 
-  renderXAxis() { }
+  getCtrlPoint2(x) {
+    var i,
+      n = x.length - 1,
+      m,
+      a = new Array(n),
+      b = new Array(n),
+      r = new Array(n);
+    a[0] = 0, b[0] = 2, r[0] = x[0] + 2 * x[1];
+    for (i = 1; i < n - 1; ++i) a[i] = 1, b[i] = 4, r[i] = 4 * x[i] + 2 * x[i + 1];
+    a[n - 1] = 2, b[n - 1] = 7, r[n - 1] = 8 * x[n - 1] + x[n];
+    for (i = 1; i < n; ++i) m = a[i] / b[i - 1], b[i] -= m, r[i] -= m * r[i - 1];
+    a[n - 1] = r[n - 1] / b[n - 1];
+    for (i = n - 2; i >= 0; --i) a[i] = (r[i] - a[i + 1]) / b[i];
+    b[n - 1] = (x[n] + a[n - 1]) / 2;
+    for (i = 0; i < n - 1; ++i) b[i] = 2 * x[i + 1] - a[i + 1];
+    return [a, b];
+  }
 
-  render() { }
+  _render() {
+    const { x, y, width, height } = this.dimensions;
+    this.ctx.clearRect(x, y, width, height);
+    this.renderLine();
+  }
+
+  render = _.debounce(this._render, 300);
 }
 
 export default Line;

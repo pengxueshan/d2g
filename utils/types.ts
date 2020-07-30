@@ -7,8 +7,9 @@ export interface Config {
   sort?: boolean;
   sortKey?: string;
   pie?: PieConfig;
-  xAxis?: XAxis;
-  yAxis?: yAxis;
+  xAxis?: Array<XAxis>;
+  yAxis?: Array<YAxis>;
+  line?: Line;
 }
 
 interface PieConfig {
@@ -74,28 +75,40 @@ interface Padding {
   left?: number;
 }
 
-interface XAxis {
-  show: boolean;
-  position: string;
-  scalable: boolean;
-  key: string;
-  sort: boolean;
-  color: string;
-  lineWidth: number;
-  label: AxisLabel;
-  tick: AxisTick;
-  grid: AxisGrid;
-  padding: Padding;
+export interface XAxis {
+  show?: boolean;
+  position?: string;
+  scalable?: boolean;
+  key?: string;
+  sort?: boolean;
+  color?: string;
+  lineWidth?: number;
+  label?: AxisLabel;
+  tick?: AxisTick;
+  grid?: AxisGrid;
+  padding?: Padding;
 }
 
-interface yAxis {
-  show: boolean;
-  position: string;
-  sort: boolean;
-  color: string;
-  lineWidth: number;
-  label: AxisLabel;
-  tick: AxisTick;
-  grid: AxisGrid;
-  padding: Padding;
+export interface YAxis {
+  show?: boolean;
+  position?: string;
+  sort?: boolean;
+  color?: string;
+  lineWidth?: number;
+  label?: AxisLabel;
+  tick?: AxisTick;
+  grid?: AxisGrid;
+  padding?: Padding;
+  dataPadding?: number;
+}
+
+interface Line {
+  color?: string;
+  width?: number;
+  area?: Area;
+}
+
+interface Area {
+  show?: boolean;
+  color?: string;
 }
