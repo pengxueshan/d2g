@@ -37,7 +37,7 @@ class Pie extends Chart {
     if (pie.inner.radius <= 1) {
       this.innerRadius = this.outerRadius * pie.inner.radius;
     } else {
-      this.innerRadius = pie.inner.radius;
+      this.innerRadius = this.transValue(pie.inner.radius);
     }
   }
 
@@ -75,7 +75,7 @@ class Pie extends Chart {
     const { x, y } = this.getCenterPoint();
     const { pie } = this.config;
     let start = {
-      x,
+      x: x - this.outerRadius * Math.cos(pie.startAngle),
       y: y - this.outerRadius * Math.sin(pie.startAngle)
     };
     let startAngle = pie.startAngle;
@@ -105,11 +105,11 @@ class Pie extends Chart {
     const radius = this.innerRadius;
     const { pie } = this.config;
     let start = {
-      x,
-      y: y - this.innerRadius * Math.sin(pie.startAngle)
+      x: x - radius * Math.cos(pie.startAngle),
+      y: y - radius * Math.sin(pie.startAngle)
     };
     this.ctx.save();
-    this.ctx.globalCompositeOperation = 'destination-out';
+    // this.ctx.globalCompositeOperation = 'destination-out';
     this.ctx.beginPath();
     this.ctx.moveTo(x, y);
     this.ctx.lineTo(start.x, start.y);
