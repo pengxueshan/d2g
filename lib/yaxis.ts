@@ -118,7 +118,7 @@ class YAxis extends Chart {
       if (v > max) {
         v = max;
       }
-      let formated = v.toFixed(2);
+      let formated = this.formatValue(v);
       if (typeof yAxis.label.format === 'function') {
         formated = yAxis.label.format(v);
       }
@@ -127,6 +127,10 @@ class YAxis extends Chart {
         formated
       });
     }
+  }
+
+  formatValue(v) {
+    return v.toFixed(2);
   }
 
   calcDimensions() {
@@ -156,7 +160,7 @@ class YAxis extends Chart {
 
   renderGrid(c?, otherChartDimensions?) {
     if (!c || !otherChartDimensions) return;
-    const {x, width} = otherChartDimensions;
+    const { x, width } = otherChartDimensions;
     this.labels.forEach((label, index) => {
       const p = this.point(null, +label.formated || +label.label, true);
       this.ctx.save();
@@ -239,6 +243,42 @@ class YAxis extends Chart {
     this.ctx.fillText(label.formated || label.label, x, point.y);
     this.ctx.restore();
   }
+
+  renderCross({ value, x, y }) {
+    const yAxis = this.config;
+    this._render();
+    this.ctx.save();
+    this.ctx.textBaseline = 'middle';
+    this.ctx.textAlign = 'center';
+    let text = this.formatValue(value);
+    if (typeof yAxis.label.format === 'function') {
+      text = yAxis.label.format(value);
+    }
+    let labelWidth = this.ctx.measureText(text).width;
+    labelWidth += this.transValue(10);
+    let labelHeight = this.transValue(18);
+    let labelX;
+    if (yAxis.position === 'left') {
+      labelX = this.dimensions.x + this.dimensions.width - labelWidth;
+    } else {
+      labelX = this.dimensions.x;
+    }
+    let labelY = y - labelHeight / 2;
+    if (labelY < this.dimensions.y) {
+      labelY = this.dimensions.y;
+    } else if (labelY + labelHeight > this.dimensions.y + this.dimensions.height) {
+      labelY = this.dimensions.y + this.dimensions.height - labelHeight;
+    }
+    this.ctx.fillStyle = '#000';
+    this.ctx.fillRect(labelX, labelY, labelWidth, labelHeight);
+    this.ctx.fillStyle = '#fff';
+    this.ctx.fillText(text, labelX + labelWidth / 2, labelY + labelHeight / 2);
+    this.ctx.restore();
+  }
+
+  onMouseLeave = () => {
+    this._render();
+  };
 
   _render() {
     const { x, y, width, height } = this.dimensions;

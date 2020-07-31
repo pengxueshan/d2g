@@ -103,6 +103,11 @@ export interface YAxis {
 interface Line {
   lines?: Array<Lines>;
   grid?: Grid;
+  cross?: CrossLine;
+}
+
+interface CrossLine {
+  show?: boolean;
 }
 
 interface Lines {

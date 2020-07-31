@@ -3,6 +3,7 @@ import Chart from './chart';
 import pick from '../utils/pick';
 import XAxis from './xaxis';
 import YAxis from './yaxis';
+import style from '../utils/style';
 
 class Line extends Chart {
   data = [];
@@ -14,6 +15,8 @@ class Line extends Chart {
     width: 0,
     height: 0
   };
+  horizonLine = null;
+  verticalLine = null;
 
   constructor(config, xAxis, yAxis) {
     super();
@@ -23,7 +26,8 @@ class Line extends Chart {
   }
 
   init(c) {
-    const { canvas, ctx, config, chartInfo } = c;
+    const { wrap, canvas, ctx, config, chartInfo } = c;
+    this.wrap = wrap;
     this.canvas = canvas;
     this.ctx = ctx;
     this.chartInfo = chartInfo;
@@ -164,6 +168,47 @@ class Line extends Chart {
       });
     }
   }
+
+  renderCrossLine({ x, y }) {
+    const line = this.config;
+    if (!line.cross.show) return;
+    this._render();
+    const { x: dx, y: dy, width, height } = this.dimensions;
+    x = x < dx ? dx : x;
+    x = x > dx + width ? dx + width : x;
+    y = y < dy ? dy : y;
+    y = y > dy + height ? dy + height : y;
+    this.xAxis.forEach(ax => {
+      const { xIndex } = ax.value({ x, y });
+      ax.renderCross({
+        index: xIndex,
+        x, y
+      });
+    });
+    this.yAxis.forEach(ax => {
+      const { y: yValue } = ax.value({ x, y }, true);
+      ax.renderCross({
+        value: yValue,
+        x, y
+      });
+    });
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.moveTo(dx, y);
+    this.ctx.lineTo(dx + width, y);
+    this.ctx.moveTo(x, dy);
+    this.ctx.lineTo(x, dy + height);
+    this.ctx.stroke();
+    this.ctx.restore();
+  }
+
+  onMouseMove = (p) => {
+    this.renderCrossLine(p);
+  };
+
+  onMouseLeave = () => {
+    this._render();
+  };
 
   _render() {
     const { x, y, width, height } = this.dimensions;

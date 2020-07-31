@@ -75,6 +75,9 @@ export default {
       show: false,
       color: colors.gray, // or function
     },
+    cross: {
+      show: false
+    },
     lines: [
       {
         color: colors.black,

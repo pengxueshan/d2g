@@ -8,6 +8,7 @@ class Chart extends EventEmitter {
   ratio = 1;
   textLineHeight = 12;
   fontSize = 12;
+  wrap = null;
   canvas = null;
   ctx: CanvasRenderingContext2D = null;
   config: Config = {};
@@ -49,7 +50,7 @@ class Chart extends EventEmitter {
     this.chartInfo = info;
   }
 
-  value(datas, point, isReverse) {
+  value(point, isReverse = false) {
     const { x, y } = point;
     if (this.band) {
       const xDis = x - this.dimensions.x;
@@ -58,13 +59,13 @@ class Chart extends EventEmitter {
       let yIndex = Math.round(yDis / this.band);
       if (xIndex < 0) {
         xIndex = 0;
-      } else if (xIndex > datas.length - 1) {
-        xIndex = datas.length - 1;
+      } else if (xIndex > this.data[0].length - 1) {
+        xIndex = this.data[0].length - 1;
       }
       if (yIndex < 0) {
         yIndex = 0;
-      } else if (yIndex > datas.length - 1) {
-        yIndex = datas.length - 1;
+      } else if (yIndex > this.data[0].length - 1) {
+        yIndex = this.data[0].length - 1;
       }
       return {
         xIndex,

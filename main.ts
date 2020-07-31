@@ -42,6 +42,7 @@ class D2G extends Chart {
       const n = document.querySelector(selector);
       if (n) {
         n.appendChild(wrap);
+        this.addEvents();
         this.initChart();
       }
     }
@@ -92,6 +93,30 @@ class D2G extends Chart {
       c.on(EventTypes.UPDATE_CHART_INFO, this.handleUpdateChartInfo);
     });
   }
+
+  addEvents() {
+    this.canvas.addEventListener('mousemove', this.handleMoveMove);
+    this.canvas.addEventListener('mouseleave', this.handleMoveLeave);
+  }
+
+  handleMoveMove = (e) => {
+    this.chart.forEach(c => {
+      if (typeof c.onMouseMove === 'function') {
+        c.onMouseMove({
+          x: e.offsetX,
+          y: e.offsetY
+        });
+      }
+    });
+  };
+
+  handleMoveLeave = () => {
+    this.chart.forEach(c => {
+      if (typeof c.onMouseLeave === 'function') {
+        c.onMouseLeave();
+      }
+    });
+  };
 
   handleUpdateChartInfo = (info, id) => {
     this.chartInfo = _.merge({}, this.chartInfo, info);
@@ -161,6 +186,7 @@ class D2G extends Chart {
       ctx: this.ctx,
       config: this.config,
       chartInfo: this.chartInfo,
+      wrap: this.wrap
     };
   }
 

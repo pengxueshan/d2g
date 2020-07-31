@@ -139,7 +139,7 @@ class XAxis extends Chart {
 
   renderGrid(c?, otherChartDimensions?) {
     if (!c || !otherChartDimensions) return;
-    const {y, height} = otherChartDimensions;
+    const { y, height } = otherChartDimensions;
     this.bus((data, index) => {
       this.ctx.save();
       this.ctx.beginPath();
@@ -213,6 +213,37 @@ class XAxis extends Chart {
     this.ctx.fillText(text, x + index * this.band, labelY);
     this.ctx.restore();
   }
+
+  renderCross({ index, x, y }) {
+    this._render();
+    const d = this.data[0][index];
+    const xAxis = this.config;
+    this.ctx.save();
+    this.ctx.textBaseline = 'middle';
+    this.ctx.textAlign = 'center';
+    let text = d[xAxis.key];
+    if (typeof xAxis.label.format === 'function') {
+      text = xAxis.label.format(text);
+    }
+    let labelWidth = this.ctx.measureText(text).width;
+    labelWidth += this.transValue(10);
+    let labelHeight = this.transValue(18);
+    let labelX = x - labelWidth / 2;
+    if (labelX < this.dimensions.x) {
+      labelX = this.dimensions.x + 1;
+    } else if (labelX + labelWidth > this.dimensions.x + this.dimensions.width) {
+      labelX = this.dimensions.x + this.dimensions.width - labelWidth - 1;
+    }
+    this.ctx.fillStyle = '#000';
+    this.ctx.fillRect(labelX, this.dimensions.y, labelWidth, labelHeight);
+    this.ctx.fillStyle = '#fff';
+    this.ctx.fillText(text, labelX + labelWidth / 2, this.dimensions.y + labelHeight / 2);
+    this.ctx.restore();
+  }
+
+  onMouseLeave = () => {
+    this._render();
+  };
 
   _render() {
     const { x, y, width, height } = this.dimensions;
