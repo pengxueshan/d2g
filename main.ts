@@ -82,7 +82,10 @@ class D2G extends Chart {
           this.chart.push(c);
           return c;
         });
-        this.chart.push(new Line(config, xCharts, yCharts));
+        this.chart.push(new Line({
+          config: c.line,
+          ...rest
+        }, xCharts, yCharts));
         break;
     }
     this.chart.forEach(c => {

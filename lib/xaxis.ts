@@ -116,24 +116,51 @@ class XAxis extends Chart {
     this.ctx.restore();
   }
 
-  renderLabel() {
+  getInterval() {
     const xAxis = this.config;
-    if (!xAxis.label.show && !xAxis.tick.show) return;
     let num = xAxis.tick.num;
     if (xAxis.tick.num < 2) {
       num = 2;
     } else if (xAxis.tick.num > this.data[0].length) {
       num = this.data[0].length + 1;
     }
-    const interval = Math.floor(this.data[0].length / (num - 1));
+    return Math.floor(this.data[0].length / (num - 1));
+  }
+
+  bus(cb) {
+    if (typeof cb !== 'function') return;
+    const interval = this.getInterval();
     this.data[0].forEach((d, index) => {
       if (index % interval === 0 || index === this.data[0].length - 1) {
-        if (xAxis.tick.show) {
-          this.renderTick(d, index);
-        }
-        if (xAxis.label.show) {
-          this.renderLabelText(d, index);
-        }
+        cb(d, index);
+      }
+    });
+  }
+
+  renderGrid(c?, otherChartDimensions?) {
+    if (!c || !otherChartDimensions) return;
+    const {y, height} = otherChartDimensions;
+    this.bus((data, index) => {
+      this.ctx.save();
+      this.ctx.beginPath();
+      const x = this.dimensions.x + index * this.band;
+      this.ctx.moveTo(x, y);
+      this.ctx.lineTo(x, y + height);
+      this.ctx.strokeStyle = c.grid.color;
+      this.ctx.stroke();
+      this.ctx.restore();
+    });
+  }
+
+  renderLabel() {
+    const xAxis = this.config;
+    if (!xAxis.label.show && !xAxis.tick.show) return;
+    this.bus((d, index) => {
+      if (xAxis.tick.show) {
+        this.renderTick(d, index);
+      }
+      if (xAxis.label.show) {
+        this.renderLabelText(d, index);
       }
     });
   }

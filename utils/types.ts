@@ -63,7 +63,7 @@ interface AxisTick {
   color: string | Function;
 }
 
-interface AxisGrid {
+interface Grid {
   show: boolean;
   color: string;
 }
@@ -85,7 +85,6 @@ export interface XAxis {
   lineWidth?: number;
   label?: AxisLabel;
   tick?: AxisTick;
-  grid?: AxisGrid;
   padding?: Padding;
 }
 
@@ -97,12 +96,16 @@ export interface YAxis {
   lineWidth?: number;
   label?: AxisLabel;
   tick?: AxisTick;
-  grid?: AxisGrid;
   padding?: Padding;
   dataPadding?: number;
 }
 
 interface Line {
+  lines?: Array<Lines>;
+  grid?: Grid;
+}
+
+interface Lines {
   color?: string;
   width?: number;
   area?: Area;

@@ -46,10 +46,6 @@ export default {
       len: 5,
       color: colors.black, // or function
     },
-    grid: {
-      show: false,
-      color: colors.gray, // or function
-    }
   }],
   yAxis: [{
     show: true,
@@ -73,19 +69,21 @@ export default {
       len: 5,
       color: colors.black, // or function
     },
+  }],
+  line: {
     grid: {
       show: false,
       color: colors.gray, // or function
-    }
-  }],
-  line: [
-    {
-      color: colors.black,
-      width: 1,
-      area: {
-        show: true,
-        color: ['rgba(255,0,0,0.6)', 'rgba(255,0,0,0.3)']
+    },
+    lines: [
+      {
+        color: colors.black,
+        width: 1,
+        area: {
+          show: true,
+          color: ['rgba(255,0,0,0.6)', 'rgba(255,0,0,0.3)']
+        },
       }
-    }
-  ]
+    ]
+  }
 }

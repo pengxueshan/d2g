@@ -154,6 +154,21 @@ class YAxis extends Chart {
     this.ctx.restore();
   }
 
+  renderGrid(c?, otherChartDimensions?) {
+    if (!c || !otherChartDimensions) return;
+    const {x, width} = otherChartDimensions;
+    this.labels.forEach((label, index) => {
+      const p = this.point(null, +label.formated || +label.label, true);
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.moveTo(x, p.y);
+      this.ctx.lineTo(x + width, p.y);
+      this.ctx.strokeStyle = c.grid.color;
+      this.ctx.stroke();
+      this.ctx.restore();
+    });
+  }
+
   renderLabel() {
     const yAxis = this.config;
     if (!yAxis.label.show && !yAxis.tick.show) return;

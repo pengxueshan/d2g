@@ -32,7 +32,9 @@ const chart = new D2G(
         },
       },
     ],
-    line: [{ area: { show: false } }],
+    line: {
+      lines: [{ area: { show: false } }],
+    },
   },
   '#line3'
 );

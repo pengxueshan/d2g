@@ -22,7 +22,12 @@ const chart = new D2G(
         },
       },
     ],
-    line: [{ area: { show: false } }],
+    line: {
+      grid: {
+        show: true
+      },
+      lines: [{ area: { show: false } }],
+    },
   },
   '#line1'
 );

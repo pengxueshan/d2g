@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import Chart from './chart';
 import pick from '../utils/pick';
+import XAxis from './xaxis';
+import YAxis from './yaxis';
 
 class Line extends Chart {
   data = [];
-  xAxis: Array<Chart> = null;
-  yAxis: Array<Chart> = null;
+  xAxis: Array<XAxis> = null;
+  yAxis: Array<YAxis> = null;
   dimensions = {
     x: 0,
     y: 0,
@@ -66,13 +68,14 @@ class Line extends Chart {
   }
 
   renderLine() {
-    const { xAxis, line } = this.config;
+    const { lines } = this.config;
     let prevLineConfig;
     this.data.forEach((data, index) => {
       const points = data.map(d => {
         let x = 0;
         if (this.xAxis[0]) {
-          x = this.xAxis[0].point(data, d[xAxis[0].key], false, xAxis[0].key).x;
+          let key = this.xAxis[0].config.key;
+          x = this.xAxis[0].point(data, d[key], false, key).x;
         }
         let y = 0;
         if (this.yAxis[0]) {
@@ -97,8 +100,8 @@ class Line extends Chart {
           minY = Math.min(minY, py[0][i0], py[1][i0], ypoints[i1]);
         }
       }
-      let conf = line[index] || prevLineConfig;
-      prevLineConfig = line[index];
+      let conf = lines[index] || prevLineConfig;
+      prevLineConfig = lines[index];
       this.ctx.strokeStyle = conf.color;
       this.ctx.lineWidth = this.transValue(conf.width);
       this.ctx.stroke();
@@ -150,9 +153,22 @@ class Line extends Chart {
     return [a, b];
   }
 
+  renderGrid() {
+    const line = this.config;
+    if (line.grid.show) {
+      this.xAxis.forEach(c => {
+        c.renderGrid(line, this.dimensions);
+      });
+      this.yAxis.forEach(c => {
+        c.renderGrid(line, this.dimensions);
+      });
+    }
+  }
+
   _render() {
     const { x, y, width, height } = this.dimensions;
     this.ctx.clearRect(x, y, width, height);
+    this.renderGrid();
     this.renderLine();
   }
 
