@@ -80,7 +80,7 @@ export default {
   }],
   line: [
     {
-      color: 'red',
+      color: colors.black,
       width: 1,
       area: {
         show: true,

@@ -6,7 +6,6 @@ import Line from './lib/line';
 import XAxis from './lib/xaxis';
 import YAxis from './lib/yaxis';
 import EventTypes from './utils/events';
-import max from './utils/max';
 
 class D2G extends Chart {
   wrap = null;
@@ -21,7 +20,8 @@ class D2G extends Chart {
   }
 
   init(options = {}, selector = '') {
-    const opts = _.merge({}, config, options);
+    let cloneConfig = _.cloneDeep(config);
+    const opts = this.mergeConfig(cloneConfig, options);
     this.config = opts;
     const wrap = document.createElement('div');
     wrap.setAttribute('style', 'position:relative;');
@@ -45,6 +45,15 @@ class D2G extends Chart {
         this.initChart();
       }
     }
+  }
+
+  mergeConfig(a, b) {
+    return _.mergeWith(a, b, (value, source) => {
+      if (_.isArray(value) && _.isArray(source) && value.length < source.length) {
+        value = source.map(() => _.cloneDeep(value[0]));
+        return _.merge(value, source);
+      }
+    });
   }
 
   initChart() {

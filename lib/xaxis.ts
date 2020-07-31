@@ -126,17 +126,15 @@ class XAxis extends Chart {
       num = this.data[0].length + 1;
     }
     const interval = Math.floor(this.data[0].length / (num - 1));
-    this.data.forEach(data => {
-      data.forEach((d, index) => {
-        if (index % interval === 0 || index === data.length - 1) {
-          if (xAxis.tick.show) {
-            this.renderTick(d, index);
-          }
-          if (xAxis.label.show) {
-            this.renderLabelText(d, index);
-          }
+    this.data[0].forEach((d, index) => {
+      if (index % interval === 0 || index === this.data[0].length - 1) {
+        if (xAxis.tick.show) {
+          this.renderTick(d, index);
         }
-      });
+        if (xAxis.label.show) {
+          this.renderLabelText(d, index);
+        }
+      }
     });
   }
 

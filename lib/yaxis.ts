@@ -135,8 +135,6 @@ class YAxis extends Chart {
     this.render();
   }
 
-  calcBand() { }
-
   renderLine() {
     const { x, y, width, height } = this.dimensions;
     const yAxis = this.config;
@@ -170,8 +168,12 @@ class YAxis extends Chart {
         tickX = this.dimensions.x;
         labelX = this.dimensions.x;
       }
-      this.renderTick({ x: tickX, y: p.y }, label);
-      this.renderLabelText({ x: labelX, y: p.y }, label, index);
+      if (yAxis.tick.show) {
+        this.renderTick({ x: tickX, y: p.y }, label);
+      }
+      if (yAxis.label.show) {
+        this.renderLabelText({ x: labelX, y: p.y }, label, index);
+      }
     });
   }
 

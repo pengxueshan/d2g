@@ -1,37 +1,39 @@
 import D2G from '../main.ts';
+import datas from './data.json';
 
 const wrap = document.createElement('div');
-wrap.id = 'line1';
+wrap.id = 'line3';
 wrap.className = 'chart';
 document.querySelector('#app').appendChild(wrap);
 const chart = new D2G(
   {
     type: 'line',
     sortKey: 'date',
+    window: 100,
+    width: 500,
     xAxis: [
       {
         tick: {
-          num: 5,
+          show: false,
+          num: 2,
+        },
+        label: {
+          format: (data) => {
+            return data.slice(0, 10);
+          },
         },
       },
     ],
     yAxis: [
       {
         tick: {
+          show: false,
           num: 5,
         },
       },
     ],
     line: [{ area: { show: false } }],
   },
-  '#line1'
+  '#line3'
 );
-chart.setData([
-  [
-    { value: 1, date: '2011' },
-    { value: 3, date: '2012' },
-    { value: 2, date: '2013' },
-    { value: 5, date: '2014' },
-    { value: 4, date: '2015' },
-  ],
-]);
+chart.setData([datas]);
