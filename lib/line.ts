@@ -198,6 +198,7 @@ class Line extends Chart {
     this.ctx.lineTo(dx + width, y);
     this.ctx.moveTo(x, dy);
     this.ctx.lineTo(x, dy + height);
+    this.ctx.lineWidth = 1;
     this.ctx.stroke();
     this.ctx.restore();
   }
