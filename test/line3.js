@@ -33,8 +33,8 @@ const chart = new D2G(
       },
     ],
     line: {
-      cross: { show: true },
-      lines: [{ color: '#369', area: { show: false } }],
+      cross: {show: true},
+      lines: [{color: '#369', area: {show: false}}],
     },
   },
   '#line3'

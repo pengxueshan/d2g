@@ -24,19 +24,19 @@ const chart = new D2G(
     ],
     line: {
       grid: {
-        show: true
+        show: true,
       },
-      lines: [{ area: { show: false } }],
+      lines: [{area: {show: false}}],
     },
   },
   '#line1'
 );
 chart.setData([
   [
-    { value: 1, date: '2011' },
-    { value: 3, date: '2012' },
-    { value: 2, date: '2013' },
-    { value: 5, date: '2014' },
-    { value: 4, date: '2015' },
+    {value: 1, date: '2011'},
+    {value: 3, date: '2012'},
+    {value: 2, date: '2013'},
+    {value: 5, date: '2014'},
+    {value: 4, date: '2015'},
   ],
 ]);
