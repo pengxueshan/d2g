@@ -3,8 +3,10 @@ import Chart from './chart';
 import EventTypes from '../utils/events';
 import pick from '../utils/pick';
 import { XAxis as XAxisConfig } from '../utils/types';
+import { ChartType } from '../utils/chart';
 
 class XAxis extends Chart {
+  type = ChartType.xAxis;
   data = [];
   dimensions = {
     x: 0,
@@ -12,6 +14,7 @@ class XAxis extends Chart {
     width: 0,
     height: 0
   };
+  prevDimensions = null;
   band = 0;
   config: XAxisConfig = {};
 
@@ -106,12 +109,13 @@ class XAxis extends Chart {
   renderLine() {
     const xAxis = this.config;
     const { x, y, width } = this.dimensions;
+    let lineWidth = this.transValue(xAxis.lineWidth);
     this.ctx.save();
     this.ctx.beginPath();
-    this.ctx.moveTo(x, y);
-    this.ctx.lineTo(x + width, y);
+    this.ctx.moveTo(x, y + lineWidth / 2);
+    this.ctx.lineTo(x + width, y + lineWidth / 2);
     this.ctx.strokeStyle = xAxis.color;
-    this.ctx.lineWidth = this.transValue(xAxis.lineWidth);
+    this.ctx.lineWidth = lineWidth;
     this.ctx.stroke();
     this.ctx.restore();
   }
@@ -167,11 +171,17 @@ class XAxis extends Chart {
 
   renderTick(data, index) {
     const xAxis = this.config;
-    const { x, y } = this.dimensions;
+    const { x, y, width } = this.dimensions;
     this.ctx.save();
     this.ctx.beginPath();
-    this.ctx.moveTo(x + index * this.band, y);
-    this.ctx.lineTo(x + index * this.band, y + this.transValue(xAxis.tick.len));
+    let tickX = x + index * this.band;
+    if (tickX <= x) {
+      tickX += this.transValue(1 / 2);
+    } else if (tickX >= x + width) {
+      tickX -= this.transValue(1 / 2);
+    }
+    this.ctx.moveTo(tickX, y);
+    this.ctx.lineTo(tickX, y + this.transValue(xAxis.tick.len));
     let strokeStyle;
     if (typeof xAxis.tick.color === 'function') {
       strokeStyle = xAxis.tick.color(data);
@@ -215,7 +225,7 @@ class XAxis extends Chart {
   }
 
   renderCross({ index, x, y }) {
-    this._render();
+    this.render();
     const d = this.data[0][index];
     const xAxis = this.config;
     this.ctx.save();
@@ -242,12 +252,13 @@ class XAxis extends Chart {
   }
 
   onMouseLeave = () => {
-    this._render();
+    this.render();
   };
 
-  _render() {
-    const { x, y, width, height } = this.dimensions;
+  render() {
+    const { x, y, width, height } = this.prevDimensions || this.dimensions;
     this.ctx.clearRect(x, y, width, height);
+    this.prevDimensions = { ...this.dimensions };
     const xAxis = this.config;
     if (this.data.length && xAxis.show) {
       this.renderLine();
@@ -255,7 +266,7 @@ class XAxis extends Chart {
     }
   }
 
-  render = _.debounce(this._render, 300);
+  // render = _.debounce(this._render, 300);
 }
 
 export default XAxis;

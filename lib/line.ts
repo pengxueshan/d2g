@@ -15,6 +15,7 @@ class Line extends Chart {
     width: 0,
     height: 0
   };
+  prevDimensions = null;
   horizonLine = null;
   verticalLine = null;
 
@@ -172,7 +173,7 @@ class Line extends Chart {
   renderCrossLine({ x, y }) {
     const line = this.config;
     if (!line.cross.show) return;
-    this._render();
+    this.render();
     const { x: dx, y: dy, width, height } = this.dimensions;
     x = x < dx ? dx : x;
     x = x > dx + width ? dx + width : x;
@@ -208,17 +209,18 @@ class Line extends Chart {
   };
 
   onMouseLeave = () => {
-    this._render();
+    this.render();
   };
 
-  _render() {
-    const { x, y, width, height } = this.dimensions;
+  render() {
+    const { x, y, width, height } = this.prevDimensions || this.dimensions;
     this.ctx.clearRect(x, y, width, height);
     this.renderGrid();
     this.renderLine();
+    this.prevDimensions = { ...this.dimensions };
   }
 
-  render = _.debounce(this._render, 300);
+  // render = _.debounce(this._render, 300);
 }
 
 export default Line;

@@ -14,6 +14,7 @@ class YAxis extends Chart {
     width: 0,
     height: 0
   };
+  prevDimensions = null;
   labels = [];
   range = [];
   config: YAxisConfig = {};
@@ -143,16 +144,17 @@ class YAxis extends Chart {
     const { x, y, width, height } = this.dimensions;
     const yAxis = this.config;
     let lineX;
+    let lineWidth = this.transValue(yAxis.lineWidth);
     if (yAxis.position === 'left') {
-      lineX = x + width;
+      lineX = x + width - lineWidth / 2;
     } else {
-      lineX = x;
+      lineX = x + lineWidth / 2;
     }
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.moveTo(lineX, y);
     this.ctx.lineTo(lineX, y + height);
-    this.ctx.lineWidth = this.transValue(yAxis.lineWidth);
+    this.ctx.lineWidth = lineWidth;
     this.ctx.strokeStyle = yAxis.color;
     this.ctx.stroke();
     this.ctx.restore();
@@ -198,10 +200,17 @@ class YAxis extends Chart {
 
   renderTick(point, label) {
     const yAxis = this.config;
+    const {y, height} = this.dimensions;
+    let tickY = point.y;
+    if (tickY <= y) {
+      tickY += this.transValue(1) / 2;
+    } else if (tickY >= y + height) {
+      tickY -= this.transValue(1) / 2;
+    }
     this.ctx.save();
     this.ctx.beginPath();
-    this.ctx.moveTo(point.x, point.y);
-    this.ctx.lineTo(point.x + this.transValue(yAxis.tick.len), point.y);
+    this.ctx.moveTo(point.x, tickY);
+    this.ctx.lineTo(point.x + this.transValue(yAxis.tick.len), tickY);
     if (typeof yAxis.tick.color === 'function') {
       this.ctx.strokeStyle = yAxis.tick.color(label);
     } else {
@@ -245,8 +254,8 @@ class YAxis extends Chart {
   }
 
   renderCross({ value, x, y }) {
+    this.render();
     const yAxis = this.config;
-    this._render();
     this.ctx.save();
     this.ctx.textBaseline = 'middle';
     this.ctx.textAlign = 'center';
@@ -277,17 +286,18 @@ class YAxis extends Chart {
   }
 
   onMouseLeave = () => {
-    this._render();
+    this.render();
   };
 
-  _render() {
-    const { x, y, width, height } = this.dimensions;
+  render() {
+    const { x, y, width, height } = this.prevDimensions || this.dimensions;
     this.ctx.clearRect(x, y, width, height);
     this.renderLine();
     this.renderLabel();
+    this.prevDimensions = { ...this.dimensions };
   }
 
-  render = _.debounce(this._render, 300);
+  // render = _.debounce(this._render, 300);
 }
 
 export default YAxis;

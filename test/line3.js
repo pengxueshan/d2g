@@ -9,7 +9,7 @@ const chart = new D2G(
   {
     type: 'line',
     sortKey: 'date',
-    window: 100,
+    window: 50,
     width: 500,
     xAxis: [
       {

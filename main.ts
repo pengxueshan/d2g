@@ -6,13 +6,21 @@ import Line from './lib/line';
 import XAxis from './lib/xaxis';
 import YAxis from './lib/yaxis';
 import EventTypes from './utils/events';
+import { ChartType } from './utils/chart';
 
 class D2G extends Chart {
   wrap = null;
   chart = [];
   originData = [];
-
+  windowXIndexOffset = 0;
   windowIndex = [0, 0];
+
+  dragInfo = {
+    startX: 0,
+    startY: 0,
+    windowIndex: 0
+  };
+  xband = 0;
 
   constructor(options, selector) {
     super(options);
@@ -95,11 +103,12 @@ class D2G extends Chart {
   }
 
   addEvents() {
-    this.canvas.addEventListener('mousemove', this.handleMoveMove);
-    this.canvas.addEventListener('mouseleave', this.handleMoveLeave);
+    this.canvas.addEventListener('mousemove', this.handleMouseMove);
+    this.canvas.addEventListener('mouseleave', this.handleMouseLeave);
+    this.addDragEvents();
   }
 
-  handleMoveMove = (e) => {
+  handleMouseMove = (e) => {
     this.chart.forEach(c => {
       if (typeof c.onMouseMove === 'function') {
         c.onMouseMove({
@@ -110,12 +119,54 @@ class D2G extends Chart {
     });
   };
 
-  handleMoveLeave = () => {
+  handleMouseLeave = () => {
+    this.canvas.addEventListener('mousemove', this.handleMouseMove);
+    this.canvas.removeEventListener('mousemove', this.handleDragMouseMove);
+    this.canvas.removeEventListener('mouseup', this.handleDragMouseUp);
     this.chart.forEach(c => {
       if (typeof c.onMouseLeave === 'function') {
         c.onMouseLeave();
       }
     });
+  };
+
+  addDragEvents() {
+    this.canvas.addEventListener('mousedown', this.handleMouseDown);
+  }
+
+  handleMouseDown = (e) => {
+    this.canvas.removeEventListener('mousemove', this.handleMouseMove);
+    this.dragInfo.startX = e.offsetX;
+    this.dragInfo.startY = e.offsetY;
+    this.dragInfo.windowIndex = this.windowIndex[0];
+    this.calcXBand();
+    this.canvas.addEventListener('mousemove', this.handleDragMouseMove);
+    this.canvas.addEventListener('mouseup', this.handleDragMouseUp);
+  };
+
+  calcXBand() {
+    if (!this.xband) {
+      for (let i = 0; i < this.chart.length; i++) {
+        const c = this.chart[i];
+        if (c.type === ChartType.xAxis && c.band) {
+          this.xband = c.band;
+          break;
+        }
+      }
+    }
+  }
+
+  handleDragMouseMove = (e) => {
+    if (!this.xband) return;
+    const delta = Math.floor((e.offsetX - this.dragInfo.startX) / this.xband);
+    this.windowXIndexOffset = -delta;
+    this.calcWindow();
+  };
+
+  handleDragMouseUp = () => {
+    this.canvas.addEventListener('mousemove', this.handleMouseMove);
+    this.canvas.removeEventListener('mousemove', this.handleDragMouseMove);
+    this.canvas.removeEventListener('mouseup', this.handleDragMouseUp);
   };
 
   handleUpdateChartInfo = (info, id) => {
@@ -162,7 +213,9 @@ class D2G extends Chart {
   }
 
   calcWindow() {
-    const { window } = this.config;
+    let { window } = this.config;
+    window = window > this.originData[0].length ? this.originData[0].length : window;
+    this.windowIndex[0] = this.dragInfo.windowIndex + this.windowXIndexOffset;
     if (!window) {
       this.windowIndex = [0, this.originData[0].length - 1];
     } else if (window <= 1) {
@@ -171,8 +224,13 @@ class D2G extends Chart {
     } else {
       this.windowIndex[1] = this.windowIndex[0] + window;
     }
-    if (this.windowIndex[1] > this.originData[0].length - 1) {
-      this.windowIndex[1] = this.originData[0].length - 1;
+    if (this.windowIndex[0] < 0) {
+      this.windowIndex[1] += Math.abs(this.windowIndex[0]);
+      this.windowIndex[0] = 0;
+    }
+    if (this.windowIndex[1] > this.originData[0].length) {
+      this.windowIndex[0] -= this.windowIndex[1] - this.originData[0].length;
+      this.windowIndex[1] = this.originData[0].length;
     }
     if (this.chart.length) {
       const data = this.originData.map(d => d.slice(this.windowIndex[0], this.windowIndex[1] + 1));

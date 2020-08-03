@@ -12,6 +12,7 @@ const chart = new D2G(
       {
         tick: {
           num: 5,
+          color: 'red'
         },
       },
     ],
