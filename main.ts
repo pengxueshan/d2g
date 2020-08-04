@@ -70,36 +70,44 @@ class D2G extends Chart {
     const config = this.getGlobalConfig();
     switch (this.config.type) {
       case 'pie':
-        this.chart.push(new Pie(config));
+        this.initPie(config);
         break;
       case 'line':
-        const { config: c, ...rest } = config;
-        const { xAxis, yAxis } = c;
-        const xCharts = xAxis.map(x => {
-          const g = new XAxis({
-            config: x,
-            ...rest
-          });
-          this.chart.push(g);
-          return g;
-        });
-        const yCharts = yAxis.map(y => {
-          const g = new YAxis({
-            config: y,
-            ...rest
-          });
-          this.chart.push(g);
-          return g;
-        });
-        this.chart.push(new Line({
-          config: c.line,
-          ...rest
-        }, xCharts, yCharts));
+        this.initLine(config);
         break;
     }
     this.chart.forEach(c => {
       c.on(EventTypes.UPDATE_CHART_INFO, this.handleUpdateChartInfo);
     });
+  }
+
+  initPie(config) {
+    this.chart.push(new Pie(config));
+  }
+
+  initLine(config) {
+    const { config: c, ...rest } = config;
+    const { xAxis, yAxis } = c;
+    const xCharts = xAxis.map(x => {
+      const g = new XAxis({
+        config: x,
+        ...rest
+      });
+      this.chart.push(g);
+      return g;
+    });
+    const yCharts = yAxis.map(y => {
+      const g = new YAxis({
+        config: y,
+        ...rest
+      });
+      this.chart.push(g);
+      return g;
+    });
+    this.chart.push(new Line({
+      config: c.line,
+      ...rest
+    }, xCharts, yCharts));
   }
 
   addEvents() {
