@@ -3,7 +3,7 @@ import Chart from './chart';
 import pick from '../utils/pick';
 import XAxis from './xaxis';
 import YAxis from './yaxis';
-import style from '../utils/style';
+import { Line as LineType } from '../utils/types';
 
 class Line extends Chart {
   data = [];
@@ -18,6 +18,7 @@ class Line extends Chart {
   prevDimensions = null;
   horizonLine = null;
   verticalLine = null;
+  lineConfig: LineType = {}
 
   constructor(config, xAxis, yAxis) {
     super();
@@ -36,7 +37,7 @@ class Line extends Chart {
   }
 
   setConfig(c = {}) {
-    this.config = _.merge({}, this.config, c);
+    this.lineConfig = _.merge({}, this.lineConfig, c);
   }
 
   setData(data) {
@@ -73,13 +74,13 @@ class Line extends Chart {
   }
 
   renderLine() {
-    const { lines } = this.config;
+    const { lines } = this.lineConfig;
     let prevLineConfig;
     this.data.forEach((data, index) => {
       const points = data.map(d => {
         let x = 0;
         if (this.xAxis[0]) {
-          let key = this.xAxis[0].config.key;
+          let key = this.xAxis[0].axisConfig.key;
           x = this.xAxis[0].point(data, d[key], false, key).x;
         }
         let y = 0;
@@ -159,19 +160,21 @@ class Line extends Chart {
   }
 
   renderGrid() {
-    const line = this.config;
-    if (line.grid.show) {
+    const line = this.lineConfig;
+    if (line.xGrid.show) {
       this.xAxis.forEach(c => {
-        c.renderGrid(line, this.dimensions);
+        c.renderGrid(line.xGrid, this.dimensions);
       });
+    }
+    if (line.yGrid.show) {
       this.yAxis.forEach(c => {
-        c.renderGrid(line, this.dimensions);
+        c.renderGrid(line.yGrid, this.dimensions);
       });
     }
   }
 
   renderCrossLine({ x, y }) {
-    const line = this.config;
+    const line = this.lineConfig;
     if (!line.cross.show) return;
     this.render();
     const { x: dx, y: dy, width, height } = this.dimensions;

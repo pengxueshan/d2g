@@ -16,7 +16,7 @@ class XAxis extends Chart {
   };
   prevDimensions = null;
   band = 0;
-  config: XAxisConfig = {};
+  axisConfig: XAxisConfig = {};
 
   constructor(config) {
     super();
@@ -32,7 +32,7 @@ class XAxis extends Chart {
   }
 
   setConfig(c = {}) {
-    this.config = _.merge({}, this.config, c);
+    this.axisConfig = _.merge({}, this.axisConfig, c);
   }
 
   setData(data) {
@@ -45,10 +45,10 @@ class XAxis extends Chart {
   }
 
   calcHeight() {
-    const xAxis = this.config;
+    const xAxis = this.axisConfig;
     let height = 0;
     if (xAxis.show) {
-      height += this.transValue(xAxis.lineWidth < 1 ? 1 : xAxis.lineWidth);
+      height += this.transValue(xAxis.line.width < 1 ? 1 : xAxis.line.width);
       if (xAxis.tick.show) {
         height += this.transValue(xAxis.tick.len);
       }
@@ -107,21 +107,22 @@ class XAxis extends Chart {
   }
 
   renderLine() {
-    const xAxis = this.config;
+    const xAxis = this.axisConfig;
+    if (!xAxis.line.show) return;
     const { x, y, width } = this.dimensions;
-    let lineWidth = this.transValue(xAxis.lineWidth);
+    let lineWidth = this.transValue(xAxis.line.width);
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.moveTo(x, y + lineWidth / 2);
     this.ctx.lineTo(x + width, y + lineWidth / 2);
-    this.ctx.strokeStyle = xAxis.color;
+    this.ctx.strokeStyle = xAxis.line.color;
     this.ctx.lineWidth = lineWidth;
     this.ctx.stroke();
     this.ctx.restore();
   }
 
   getInterval() {
-    const xAxis = this.config;
+    const xAxis = this.axisConfig;
     let num = xAxis.tick.num;
     if (xAxis.tick.num < 2) {
       num = 2;
@@ -150,14 +151,14 @@ class XAxis extends Chart {
       const x = this.dimensions.x + index * this.band;
       this.ctx.moveTo(x, y);
       this.ctx.lineTo(x, y + height);
-      this.ctx.strokeStyle = c.grid.color;
+      this.ctx.strokeStyle = c.color;
       this.ctx.stroke();
       this.ctx.restore();
     });
   }
 
   renderLabel() {
-    const xAxis = this.config;
+    const xAxis = this.axisConfig;
     if (!xAxis.label.show && !xAxis.tick.show) return;
     this.bus((d, index) => {
       if (xAxis.tick.show) {
@@ -170,7 +171,7 @@ class XAxis extends Chart {
   }
 
   renderTick(data, index) {
-    const xAxis = this.config;
+    const xAxis = this.axisConfig;
     const { x, y, width } = this.dimensions;
     this.ctx.save();
     this.ctx.beginPath();
@@ -194,9 +195,9 @@ class XAxis extends Chart {
   }
 
   renderLabelText(data, index) {
-    const xAxis = this.config;
+    const xAxis = this.axisConfig;
     const { x, y } = this.dimensions;
-    let textAlign = 'center';
+    let textAlign: CanvasTextAlign = 'center';
     if (index === 0) {
       textAlign = 'left';
     } else if (index === this.data[0].length - 1) {
@@ -227,7 +228,7 @@ class XAxis extends Chart {
   renderCross({ index, x, y }) {
     this.render();
     const d = this.data[0][index];
-    const xAxis = this.config;
+    const xAxis = this.axisConfig;
     this.ctx.save();
     this.ctx.textBaseline = 'middle';
     this.ctx.textAlign = 'center';
@@ -259,7 +260,7 @@ class XAxis extends Chart {
     const { x, y, width, height } = this.prevDimensions || this.dimensions;
     this.ctx.clearRect(x, y, width, height);
     this.prevDimensions = { ...this.dimensions };
-    const xAxis = this.config;
+    const xAxis = this.axisConfig;
     if (this.data.length && xAxis.show) {
       this.renderLine();
       this.renderLabel();

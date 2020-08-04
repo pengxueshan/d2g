@@ -17,7 +17,7 @@ class YAxis extends Chart {
   prevDimensions = null;
   labels = [];
   range = [];
-  config: YAxisConfig = {};
+  axisConfig: YAxisConfig = {};
 
   constructor(config) {
     super();
@@ -33,7 +33,7 @@ class YAxis extends Chart {
   }
 
   setConfig(c = {}) {
-    this.config = _.merge({}, this.config, c);
+    this.axisConfig = _.merge({}, this.axisConfig, c);
   }
 
   setData(data) {
@@ -47,10 +47,10 @@ class YAxis extends Chart {
   }
 
   calcWidth() {
-    const yAxis = this.config;
+    const yAxis = this.axisConfig;
     let width = 0;
     if (yAxis.show) {
-      width += this.transValue(yAxis.lineWidth < 1 ? 1 : yAxis.lineWidth);
+      width += this.transValue(yAxis.line.width < 1 ? 1 : yAxis.line.width);
       if (yAxis.tick.show) {
         width += this.transValue(yAxis.tick.len);
       }
@@ -106,7 +106,7 @@ class YAxis extends Chart {
 
   calcLabels() {
     let [min, max] = minmax(_.flatten(this.data), 'value');
-    const yAxis = this.config;
+    const yAxis = this.axisConfig;
     const total = max - min;
     min = min - total * yAxis.dataPadding;
     max = max + total * yAxis.dataPadding;
@@ -142,9 +142,10 @@ class YAxis extends Chart {
 
   renderLine() {
     const { x, y, width, height } = this.dimensions;
-    const yAxis = this.config;
+    const yAxis = this.axisConfig;
+    if (!yAxis.line.show) return;
     let lineX;
-    let lineWidth = this.transValue(yAxis.lineWidth);
+    let lineWidth = this.transValue(yAxis.line.width);
     if (yAxis.position === 'left') {
       lineX = x + width - lineWidth / 2;
     } else {
@@ -155,7 +156,7 @@ class YAxis extends Chart {
     this.ctx.moveTo(lineX, y);
     this.ctx.lineTo(lineX, y + height);
     this.ctx.lineWidth = lineWidth;
-    this.ctx.strokeStyle = yAxis.color;
+    this.ctx.strokeStyle = yAxis.line.color;
     this.ctx.stroke();
     this.ctx.restore();
   }
@@ -169,14 +170,14 @@ class YAxis extends Chart {
       this.ctx.beginPath();
       this.ctx.moveTo(x, p.y);
       this.ctx.lineTo(x + width, p.y);
-      this.ctx.strokeStyle = c.grid.color;
+      this.ctx.strokeStyle = c.color;
       this.ctx.stroke();
       this.ctx.restore();
     });
   }
 
   renderLabel() {
-    const yAxis = this.config;
+    const yAxis = this.axisConfig;
     if (!yAxis.label.show && !yAxis.tick.show) return;
     this.labels.forEach((label, index) => {
       const p = this.point(null, +label.formated || +label.label, true);
@@ -199,7 +200,7 @@ class YAxis extends Chart {
   }
 
   renderTick(point, label) {
-    const yAxis = this.config;
+    const yAxis = this.axisConfig;
     const {y, height} = this.dimensions;
     let tickY = point.y;
     if (tickY <= y) {
@@ -221,7 +222,7 @@ class YAxis extends Chart {
   }
 
   renderLabelText(point, label, index) {
-    const yAxis = this.config;
+    const yAxis = this.axisConfig;
     this.ctx.save();
     if (index === 0) {
       this.ctx.textBaseline = 'bottom';
@@ -255,7 +256,7 @@ class YAxis extends Chart {
 
   renderCross({ value, x, y }) {
     this.render();
-    const yAxis = this.config;
+    const yAxis = this.axisConfig;
     this.ctx.save();
     this.ctx.textBaseline = 'middle';
     this.ctx.textAlign = 'center';

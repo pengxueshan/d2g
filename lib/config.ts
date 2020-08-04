@@ -29,8 +29,11 @@ export default {
     mode: 'outside', // inside
     scalable: true,
     key: 'date',
-    color: colors.black,
-    lineWidth: 1,
+    line: {
+      show: true,
+      color: colors.black,
+      width: 1,
+    },
     padding: {
       bottom: 5
     },
@@ -51,8 +54,11 @@ export default {
     show: true,
     position: 'left',
     mode: 'outside', // inside
-    color: colors.black,
-    lineWidth: 1,
+    line: {
+      show: true,
+      color: colors.black,
+      width: 1,
+    },
     padding: {
       left: 5
     },
@@ -71,7 +77,11 @@ export default {
     },
   }],
   line: {
-    grid: {
+    xGrid: {
+      show: false,
+      color: colors.gray, // or function
+    },
+    yGrid: {
       show: false,
       color: colors.gray, // or function
     },

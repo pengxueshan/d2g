@@ -76,20 +76,20 @@ class D2G extends Chart {
         const { config: c, ...rest } = config;
         const { xAxis, yAxis } = c;
         const xCharts = xAxis.map(x => {
-          const c = new XAxis({
+          const g = new XAxis({
             config: x,
             ...rest
           });
-          this.chart.push(c);
-          return c;
+          this.chart.push(g);
+          return g;
         });
         const yCharts = yAxis.map(y => {
-          const c = new YAxis({
+          const g = new YAxis({
             config: y,
             ...rest
           });
-          this.chart.push(c);
-          return c;
+          this.chart.push(g);
+          return g;
         });
         this.chart.push(new Line({
           config: c.line,

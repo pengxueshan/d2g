@@ -81,8 +81,7 @@ export interface XAxis {
   scalable?: boolean;
   key?: string;
   sort?: boolean;
-  color?: string;
-  lineWidth?: number;
+  line?: AxisLine;
   label?: AxisLabel;
   tick?: AxisTick;
   padding?: Padding;
@@ -92,17 +91,23 @@ export interface YAxis {
   show?: boolean;
   position?: string;
   sort?: boolean;
-  color?: string;
-  lineWidth?: number;
+  line?: AxisLine;
   label?: AxisLabel;
   tick?: AxisTick;
   padding?: Padding;
   dataPadding?: number;
 }
 
-interface Line {
+interface AxisLine {
+  color: string;
+  show: boolean;
+  width: number;
+}
+
+export interface Line {
   lines?: Array<Lines>;
-  grid?: Grid;
+  xGrid?: Grid;
+  yGrid?: Grid;
   cross?: CrossLine;
 }
 

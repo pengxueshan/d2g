@@ -1,7 +1,7 @@
 import D2G from '../main.ts';
 
 const wrap = document.createElement('div');
-wrap.id = 'line1';
+wrap.id = 'line4';
 wrap.className = 'chart';
 document.querySelector('#app').appendChild(wrap);
 const chart = new D2G(
@@ -10,30 +10,35 @@ const chart = new D2G(
     sortKey: 'date',
     xAxis: [
       {
+        line: {
+          show: false
+        },
         tick: {
-          num: 5,
-          color: 'red'
+          num: 2,
+          show: false
         },
       },
     ],
     yAxis: [
       {
+        line: {
+          show: false
+        },
         tick: {
           num: 5,
+          show: false
         },
       },
     ],
     line: {
-      xGrid: {
-        show: true,
-      },
       yGrid: {
         show: true,
+        color: '#ddd'
       },
       lines: [{area: {show: false}}],
     },
   },
-  '#line1'
+  '#line4'
 );
 chart.setData([
   [
