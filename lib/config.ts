@@ -54,6 +54,7 @@ export default {
     show: true,
     position: 'left',
     mode: 'outside', // inside
+    key: 'value',
     line: {
       show: true,
       color: colors.black,
@@ -90,6 +91,7 @@ export default {
     },
     lines: [
       {
+        type: '',
         color: colors.black,
         width: 1,
         area: {

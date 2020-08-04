@@ -1,5 +1,6 @@
 export interface Config {
   type?: string;
+  subType?: string;
   width?: number;
   height?: number;
   font?: string;
@@ -96,6 +97,7 @@ export interface YAxis {
   tick?: AxisTick;
   padding?: Padding;
   dataPadding?: number;
+  key?: string | Array<string>;
 }
 
 interface AxisLine {
@@ -119,6 +121,7 @@ interface Lines {
   color?: string;
   width?: number;
   area?: Area;
+  type?: string;
 }
 
 interface Area {

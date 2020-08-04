@@ -1,4 +1,8 @@
 export enum ChartType {
   xAxis,
-  yAxis
+  yAxis,
+  pie,
+  bar,
+  line,
+  kline
 };

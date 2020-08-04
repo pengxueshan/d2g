@@ -5,8 +5,10 @@ import pick from '../utils/pick';
 import minmax from '../utils/minmax';
 import max from '../utils/max';
 import { YAxis as YAxisConfig } from '../utils/types';
+import { ChartType } from '../utils/chart';
 
 class YAxis extends Chart {
+  type = ChartType.yAxis;
   data = [];
   dimensions = {
     x: 0,
@@ -105,8 +107,8 @@ class YAxis extends Chart {
   }
 
   calcLabels() {
-    let [min, max] = minmax(_.flatten(this.data), 'value');
     const yAxis = this.axisConfig;
+    let [min, max] = minmax(_.flatten(this.data), yAxis.key);
     const total = max - min;
     min = min - total * yAxis.dataPadding;
     max = max + total * yAxis.dataPadding;
@@ -201,7 +203,7 @@ class YAxis extends Chart {
 
   renderTick(point, label) {
     const yAxis = this.axisConfig;
-    const {y, height} = this.dimensions;
+    const { y, height } = this.dimensions;
     let tickY = point.y;
     if (tickY <= y) {
       tickY += this.transValue(1) / 2;

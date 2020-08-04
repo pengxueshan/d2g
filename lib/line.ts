@@ -4,8 +4,11 @@ import pick from '../utils/pick';
 import XAxis from './xaxis';
 import YAxis from './yaxis';
 import { Line as LineType } from '../utils/types';
+import { ChartType } from '../utils/chart';
+import minmax from '../utils/minmax';
 
 class Line extends Chart {
+  type = ChartType.line;
   data = [];
   xAxis: Array<XAxis> = null;
   yAxis: Array<YAxis> = null;
@@ -77,66 +80,112 @@ class Line extends Chart {
     const { lines } = this.lineConfig;
     let prevLineConfig;
     this.data.forEach((data, index) => {
-      const points = data.map(d => {
-        let x = 0;
-        if (this.xAxis[0]) {
-          let key = this.xAxis[0].axisConfig.key;
-          x = this.xAxis[0].point(data, d[key], false, key).x;
-        }
-        let y = 0;
-        if (this.yAxis[0]) {
-          y = this.yAxis[0].point(data, d.value, true).y;
-        }
-        return { x, y };
-      });
-      const xpoints = points.map(p => p.x);
-      const ypoints = points.map(p => p.y);
-      const px = this.getCtrlPoint2(xpoints);
-      const py = this.getCtrlPoint2(ypoints);
-      this.ctx.save();
-      this.ctx.beginPath();
-      this.ctx.moveTo(points[0].x, points[0].y);
-      let minY = points[0].y;
-      if (points.length === 2) {
-        this.ctx.lineTo(points[1].x, points[1].y);
-        minY = Math.min(minY, points[1].y);
-      } else if (points.length > 2) {
-        for (var i0 = 0, i1 = 1; i1 < points.length; ++i0, ++i1) {
-          this.ctx.bezierCurveTo(px[0][i0], py[0][i0], px[1][i0], py[1][i0], xpoints[i1], ypoints[i1]);
-          minY = Math.min(minY, py[0][i0], py[1][i0], ypoints[i1]);
-        }
-      }
       let conf = lines[index] || prevLineConfig;
       prevLineConfig = lines[index];
-      this.ctx.strokeStyle = conf.color;
-      this.ctx.lineWidth = this.transValue(conf.width);
-      this.ctx.stroke();
-      if (conf.area.show) {
-        const { x, y, width, height } = this.dimensions;
-        this.ctx.lineTo(x + width, y + height);
-        this.ctx.lineTo(x, y + height);
-        this.ctx.closePath();
-        if (Array.isArray(conf.area.color)) {
-          if (conf.area.color.length < 2) {
-            this.ctx.fillStyle = conf.area.color[0];
-          } else {
-            const grd = this.ctx.createLinearGradient(
-              0,
-              minY,
-              0,
-              this.dimensions.y + this.dimensions.height
-            );
-            let interval = 1 / (conf.area.color.length - 1);
-            conf.area.color.forEach((color, index) => {
-              grd.addColorStop(interval * index, color);
-            });
-            this.ctx.fillStyle = grd;
-          }
-        } else {
-          this.ctx.fillStyle = conf.area.color;
-        }
-        this.ctx.fill();
+      if (lines[index] && lines[index].type === 'kline') {
+        this.renderKLine(data, index);
+      } else {
+        this.renderNaturalLine(data, index, conf);
       }
+    });
+  }
+
+  renderNaturalLine(data, index, conf) {
+    const points = data.map(d => {
+      let x = 0;
+      if (this.xAxis[0]) {
+        let key = this.xAxis[0].axisConfig.key;
+        x = this.xAxis[0].point(data, d[key], false, key).x;
+      }
+      let y = 0;
+      if (this.yAxis[0]) {
+        y = this.yAxis[0].point(data, d.value, true).y;
+      }
+      return { x, y };
+    });
+    const xpoints = points.map(p => p.x);
+    const ypoints = points.map(p => p.y);
+    const px = this.getCtrlPoint2(xpoints);
+    const py = this.getCtrlPoint2(ypoints);
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.moveTo(points[0].x, points[0].y);
+    let minY = points[0].y;
+    if (points.length === 2) {
+      this.ctx.lineTo(points[1].x, points[1].y);
+      minY = Math.min(minY, points[1].y);
+    } else if (points.length > 2) {
+      for (var i0 = 0, i1 = 1; i1 < points.length; ++i0, ++i1) {
+        this.ctx.bezierCurveTo(px[0][i0], py[0][i0], px[1][i0], py[1][i0], xpoints[i1], ypoints[i1]);
+        minY = Math.min(minY, py[0][i0], py[1][i0], ypoints[i1]);
+      }
+    }
+    this.ctx.strokeStyle = conf.color;
+    this.ctx.lineWidth = this.transValue(conf.width);
+    this.ctx.stroke();
+    if (conf.area.show) {
+      const { x, y, width, height } = this.dimensions;
+      this.ctx.lineTo(x + width, y + height);
+      this.ctx.lineTo(x, y + height);
+      this.ctx.closePath();
+      if (Array.isArray(conf.area.color)) {
+        if (conf.area.color.length < 2) {
+          this.ctx.fillStyle = conf.area.color[0];
+        } else {
+          const grd = this.ctx.createLinearGradient(
+            0,
+            minY,
+            0,
+            this.dimensions.y + this.dimensions.height
+          );
+          let interval = 1 / (conf.area.color.length - 1);
+          conf.area.color.forEach((color, index) => {
+            grd.addColorStop(interval * index, color);
+          });
+          this.ctx.fillStyle = grd;
+        }
+      } else {
+        this.ctx.fillStyle = conf.area.color;
+      }
+      this.ctx.fill();
+    }
+    this.ctx.restore();
+  }
+
+  renderKLine(line, index) {
+    line.forEach((data, dataIndex) => {
+      const key = this.xAxis[index].axisConfig.key;
+      const { low, open, close, high, pclose } = data;
+      const value = data[key];
+      const barWidth = this.xAxis[0].band * 0.3;
+      let x = this.xAxis[0].point(line, value, false, key).x;
+      if (dataIndex === 0) {
+        x += barWidth / 2;
+      } else if (dataIndex === line.length - 1) {
+        x -= barWidth / 2;
+      }
+      const lowY = this.yAxis[0].point(line, low, true).y;
+      const highY = this.yAxis[0].point(line, high, true).y;
+      const openY = this.yAxis[0].point(line, open, true).y;
+      const closeY = this.yAxis[0].point(line, close, true).y;
+      const [min, max] = minmax([openY, closeY]);
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.moveTo(x - barWidth / 2, min);
+      this.ctx.lineTo(x + barWidth / 2, min);
+      this.ctx.lineTo(x + barWidth / 2, max);
+      this.ctx.lineTo(x - barWidth / 2, max);
+      this.ctx.lineTo(x - barWidth / 2, min);
+      this.ctx.moveTo(x, highY);
+      this.ctx.lineTo(x, min);
+      this.ctx.moveTo(x, max);
+      this.ctx.lineTo(x, lowY);
+      let strokeStyle = 'red';
+      if (close < pclose) {
+        strokeStyle = 'green';
+      }
+      this.ctx.strokeStyle = strokeStyle;
+      this.ctx.stroke();
       this.ctx.restore();
     });
   }
