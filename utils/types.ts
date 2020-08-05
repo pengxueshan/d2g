@@ -122,6 +122,12 @@ interface Lines {
   width?: number;
   area?: Area;
   type?: string;
+  singleLabel?: SingleLabel
+}
+
+interface SingleLabel {
+  show: boolean;
+  position: string;
 }
 
 interface Area {

@@ -16,7 +16,7 @@ const chart = new D2G(
         key: 'time',
         tick: {
           num: 6,
-          show: false
+          show: false,
         },
         label: {
           format: (data) => {
@@ -38,9 +38,9 @@ const chart = new D2G(
       yGrid: {
         show: true,
       },
-      lines: [{type: 'kline', area: {show: false}}],
+      lines: [{type: 'kline', area: {show: false}}, {type: 'singley', color: 'blue'}],
     },
   },
   '#line5'
 );
-chart.setData([kline]);
+chart.setData([kline, [{value: 15}]]);

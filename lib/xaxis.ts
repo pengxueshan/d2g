@@ -35,8 +35,9 @@ class XAxis extends Chart {
     this.axisConfig = _.merge({}, this.axisConfig, c);
   }
 
-  setData(data) {
+  setData(data, originData?) {
     this.data = data;
+    this.originData = originData;
     this.calcDimensions();
   }
 

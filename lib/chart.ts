@@ -5,6 +5,7 @@ import { v4 } from 'uuid';
 class Chart extends EventEmitter {
   id = '';
   data = [];
+  originData = [];
   ratio = 1;
   textLineHeight = 12;
   fontSize = 12;

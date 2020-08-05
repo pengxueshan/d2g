@@ -41,8 +41,9 @@ class Pie extends Chart {
     }
   }
 
-  setData(data) {
+  setData(data, originData?) {
     this.data = this.formatData(data[0]);
+    this.originData = originData;
     this.render();
   }
 

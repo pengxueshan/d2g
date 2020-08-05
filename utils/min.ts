@@ -1,4 +1,4 @@
-export default function min(values, key) {
+export default function min(values, key?) {
   let min;
   for (let i = 0; i < values.length; i++) {
     let v;

@@ -91,9 +91,13 @@ export default {
     },
     lines: [
       {
-        type: '',
+        type: '', // kline, singlex, singley
         color: colors.black,
         width: 1,
+        singleLabel: {
+          position: 'right',
+          show: true
+        }, // for single line
         area: {
           show: true,
           color: ['rgba(255,0,0,0.6)', 'rgba(255,0,0,0.3)']

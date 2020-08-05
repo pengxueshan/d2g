@@ -6,6 +6,8 @@ import YAxis from './yaxis';
 import { Line as LineType } from '../utils/types';
 import { ChartType } from '../utils/chart';
 import minmax from '../utils/minmax';
+import min from '../utils/min';
+import max from '../utils/max';
 
 class Line extends Chart {
   type = ChartType.line;
@@ -43,8 +45,9 @@ class Line extends Chart {
     this.lineConfig = _.merge({}, this.lineConfig, c);
   }
 
-  setData(data) {
+  setData(data, originData?) {
     this.data = data;
+    this.originData = originData;
     this.render();
   }
 
@@ -82,8 +85,12 @@ class Line extends Chart {
     this.data.forEach((data, index) => {
       let conf = lines[index] || prevLineConfig;
       prevLineConfig = lines[index];
-      if (lines[index] && lines[index].type === 'kline') {
+      if (conf.type === 'kline') {
         this.renderKLine(data, index);
+      } else if (conf.type === 'singlex') {
+        this.renderSingleX(index, conf);
+      } else if (conf.type === 'singley') {
+        this.renderSingleY(index, conf);
       } else {
         this.renderNaturalLine(data, index, conf);
       }
@@ -99,7 +106,11 @@ class Line extends Chart {
       }
       let y = 0;
       if (this.yAxis[0]) {
-        y = this.yAxis[0].point(data, d.value, true).y;
+        let key = this.yAxis[0].axisConfig.key;
+        if (Array.isArray(key)) {
+          key = 'value';
+        }
+        y = this.yAxis[0].point(data, d[key], true).y;
       }
       return { x, y };
     });
@@ -188,6 +199,80 @@ class Line extends Chart {
       this.ctx.stroke();
       this.ctx.restore();
     });
+  }
+
+  renderSingleX(index, conf) {
+    const d = this.originData[index][0];
+    if (!d) return;
+    const { x: dx, width, y, height } = this.dimensions;
+    let x = 0;
+    let labelText = '';
+    if (this.xAxis[0]) {
+      const key = this.xAxis[0].axisConfig.key;
+      labelText = d[key];
+      x = this.xAxis[0].point(this.originData[index], labelText, false, key).x;
+      x = max([x, dx]);
+      x = min([x, dx + width]);
+    }
+    let labelY;
+    let textBaseLine;
+    if (conf.singleLabel.position === 'top') {
+      labelY = y;
+      textBaseLine = 'top';
+    } else {
+      labelY = y + height;
+      textBaseLine = 'bottom';
+    }
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.moveTo(x, y);
+    this.ctx.lineTo(x, y + height);
+    this.ctx.lineWidth = this.transValue(conf.width);
+    this.ctx.strokeStyle = conf.color;
+    this.ctx.stroke();
+    this.ctx.textBaseline = textBaseLine;
+    this.ctx.textAlign = 'end';
+    this.ctx.fillStyle = conf.singleLabel.color || conf.color;
+    this.ctx.fillText(labelText, x, labelY);
+    this.ctx.restore();
+  }
+
+  renderSingleY(index, conf) {
+    const d = this.originData[index][0];
+    if (!d) return;
+    const { x, width, y: dy, height } = this.dimensions;
+    let y = 0;
+    let labelText = '';
+    if (this.yAxis[0]) {
+      let key = this.yAxis[0].axisConfig.key;
+      if (Array.isArray(key)) {
+        key = 'value';
+      }
+      labelText = d[key];
+      y = this.yAxis[0].point(this.originData[index], labelText, true).y;
+      y = max([y, dy]);
+      y = min([y, dy + height]);
+    }
+    let labelX;
+    let textAlign;
+    if (conf.singleLabel.position === 'right') {
+      labelX = x + width;
+      textAlign = 'end';
+    } else {
+      labelX = x;
+      textAlign = 'start';
+    }
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.moveTo(x, y);
+    this.ctx.lineTo(x + width, y);
+    this.ctx.lineWidth = this.transValue(conf.width);
+    this.ctx.strokeStyle = conf.color;
+    this.ctx.stroke();
+    this.ctx.textAlign = textAlign;
+    this.ctx.fillStyle = conf.singleLabel.color || conf.color;
+    this.ctx.fillText(labelText, labelX, y - this.transValue(5));
+    this.ctx.restore();
   }
 
   getCtrlPoint2(x) {

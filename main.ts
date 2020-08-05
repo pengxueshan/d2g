@@ -242,7 +242,7 @@ class D2G extends Chart {
     }
     if (this.chart.length) {
       const data = this.originData.map(d => d.slice(this.windowIndex[0], this.windowIndex[1] + 1));
-      this.chart.forEach(c => c.setData(data));
+      this.chart.forEach(c => c.setData(data, this.originData));
     }
   }
 
