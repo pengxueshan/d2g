@@ -120,8 +120,8 @@ class D2G extends Chart {
     this.chart.forEach(c => {
       if (typeof c.onMouseMove === 'function') {
         c.onMouseMove({
-          x: e.offsetX,
-          y: e.offsetY
+          x: this.transValue(e.offsetX),
+          y: this.transValue(e.offsetY)
         });
       }
     });
@@ -242,6 +242,7 @@ class D2G extends Chart {
     }
     if (this.chart.length) {
       const data = this.originData.map(d => d.slice(this.windowIndex[0], this.windowIndex[1] + 1));
+      // this.clear();
       this.chart.forEach(c => c.setData(data, this.originData));
     }
   }
@@ -256,8 +257,14 @@ class D2G extends Chart {
     };
   }
 
+  clear() {
+    const { width, height } = this.chartInfo;
+    this.ctx.clearRect(0, 0, width, height);
+  }
+
   render() {
     if (this.chart.length) {
+      // this.clear();
       this.chart.forEach(c => c.render());
     }
   }

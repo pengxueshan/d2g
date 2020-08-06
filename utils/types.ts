@@ -90,6 +90,7 @@ export interface XAxis {
 
 export interface YAxis {
   show?: boolean;
+  mode?: string;
   position?: string;
   sort?: boolean;
   line?: AxisLine;

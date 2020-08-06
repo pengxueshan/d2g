@@ -52,7 +52,7 @@ class YAxis extends Chart {
   calcWidth() {
     const yAxis = this.axisConfig;
     let width = 0;
-    if (yAxis.show) {
+    if (yAxis.show && yAxis.mode !== 'inside') {
       width += this.transValue(yAxis.line.width < 1 ? 1 : yAxis.line.width);
       if (yAxis.tick.show) {
         width += this.transValue(yAxis.tick.len);
@@ -149,7 +149,7 @@ class YAxis extends Chart {
     if (!yAxis.line.show) return;
     let lineX;
     let lineWidth = this.transValue(yAxis.line.width);
-    if (yAxis.position === 'left') {
+    if ((yAxis.position === 'left' && yAxis.mode !== 'inside') || (yAxis.position === 'right' && yAxis.mode === 'inside')) {
       lineX = x + width - lineWidth / 2;
     } else {
       lineX = x + lineWidth / 2;
@@ -186,7 +186,7 @@ class YAxis extends Chart {
       const p = this.point(null, +label.formated || +label.label, true);
       let tickX;
       let labelX;
-      if (yAxis.position === 'left') {
+      if ((yAxis.position === 'left' && yAxis.mode !== 'inside') || (yAxis.position === 'right' && yAxis.mode === 'inside')) {
         tickX = this.dimensions.x + this.dimensions.width - this.transValue(yAxis.tick.len);
         labelX = this.dimensions.x + this.dimensions.width;
       } else {
@@ -235,7 +235,7 @@ class YAxis extends Chart {
       this.ctx.textBaseline = 'middle';
     }
     let x = point.x;
-    if (yAxis.position === 'left') {
+    if ((yAxis.position === 'left' && yAxis.mode !== 'inside') || (yAxis.position === 'right' && yAxis.mode === 'inside')) {
       this.ctx.textAlign = 'end';
       x = x - this.transValue(yAxis.label.offset);
       if (yAxis.tick.show) {
@@ -271,7 +271,7 @@ class YAxis extends Chart {
     labelWidth += this.transValue(10);
     let labelHeight = this.transValue(18);
     let labelX;
-    if (yAxis.position === 'left') {
+    if ((yAxis.position === 'left' && yAxis.mode !== 'inside') || (yAxis.position === 'right' && yAxis.mode === 'inside')) {
       labelX = this.dimensions.x + this.dimensions.width - labelWidth;
     } else {
       labelX = this.dimensions.x;

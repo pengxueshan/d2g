@@ -354,6 +354,11 @@ class Line extends Chart {
     this.ctx.clearRect(x, y, width, height);
     this.renderGrid();
     this.renderLine();
+    this.yAxis.forEach(axis => {
+      if (axis.axisConfig.mode === 'inside') {
+        axis.render();
+      }
+    });
     this.prevDimensions = { ...this.dimensions };
   }
 
