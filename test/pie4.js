@@ -1,8 +1,11 @@
 import D2G from '../main.ts';
 
 const wrap = document.createElement('div');
+const header = document.createElement('h2');
 wrap.id = 'pie4';
 wrap.className = 'chart';
+header.innerText = '饼图-自定义角度';
+wrap.appendChild(header);
 document.querySelector('#app').appendChild(wrap);
 const chart = new D2G(
   {

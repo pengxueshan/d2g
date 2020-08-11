@@ -194,27 +194,27 @@ class D2G extends Chart {
     if (!Array.isArray(tmpData[0])) {
       tmpData = [tmpData];
     }
-    if (sort || tmpData.length > 1) {
-      if (tmpData.length === 1) {
-        tmpData.forEach(d => {
-          d.sort((a, b) => {
-            return a[sortKey] - b[sortKey];
-          });
+    if (sort) {
+      tmpData.forEach(d => {
+        d.sort((a, b) => {
+          return a[sortKey] - b[sortKey];
         });
-      } else {
-        let keys = tmpData.map(d => {
-          return d[sortKey];
-        });
-        keys = _.flatten(keys);
-        keys = _.uniq(keys);
-        keys.sort((a, b) => a - b);
-        tmpData.map(d => {
-          return keys.map(k => {
-            let f = d.find(item => item[sortKey] === k);
-            return f || { [sortKey]: k };
-          });
-        });
-      }
+      });
+      // if (tmpData.length === 1) {
+      // } else {
+      //   let keys = tmpData.map(d => {
+      //     return d[sortKey];
+      //   });
+      //   keys = _.flatten(keys);
+      //   keys = _.uniq(keys);
+      //   keys.sort((a, b) => a - b);
+      //   tmpData.map(d => {
+      //     return keys.map(k => {
+      //       let f = d.find(item => item[sortKey] === k);
+      //       return f || { [sortKey]: k };
+      //     });
+      //   });
+      // }
     }
     this.originData = tmpData;
     this.calcWindow();

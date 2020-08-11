@@ -2,8 +2,11 @@ import D2G from '../main.ts';
 import kline from './kline.json';
 
 const wrap = document.createElement('div');
+const header = document.createElement('h2');
 wrap.id = 'line5';
 wrap.className = 'chart';
+header.innerText = 'K线图-带现价线';
+wrap.appendChild(header);
 document.querySelector('#app').appendChild(wrap);
 const chart = new D2G(
   {

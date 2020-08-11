@@ -1,9 +1,13 @@
 import D2G from '../main.ts';
 import datas from './data.json';
+import _ from 'lodash';
 
 const wrap = document.createElement('div');
+const header = document.createElement('h2');
 wrap.id = 'line7';
 wrap.className = 'chart';
+header.innerText = '曲线图-Y坐标轴在右侧';
+wrap.appendChild(header);
 document.querySelector('#app').appendChild(wrap);
 const chart = new D2G(
   {
@@ -43,4 +47,5 @@ const chart = new D2G(
   },
   '#line7'
 );
-chart.setData([datas]);
+const d = _.uniqBy(datas, 'date');
+chart.setData([d]);

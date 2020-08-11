@@ -1,8 +1,11 @@
 import D2G from '../main.ts';
 
 const wrap = document.createElement('div');
+const header = document.createElement('h2');
 wrap.id = 'line1';
 wrap.className = 'chart';
+header.innerText = '曲线图';
+wrap.appendChild(header);
 document.querySelector('#app').appendChild(wrap);
 const chart = new D2G(
   {
