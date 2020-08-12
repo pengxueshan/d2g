@@ -26,6 +26,7 @@ const chart = new D2G(
             return data.slice(0, 8);
           },
         },
+        itemWidth: 6
       },
     ],
     yAxis: [

@@ -24,10 +24,11 @@ class XAxis extends Chart {
   }
 
   init(c) {
-    const { canvas, ctx, config, chartInfo } = c;
+    const { canvas, ctx, config, chartInfo, font } = c;
     this.canvas = canvas;
     this.ctx = ctx;
     this.chartInfo = chartInfo;
+    this.font = font;
     this.setConfig(config);
   }
 
@@ -104,7 +105,8 @@ class XAxis extends Chart {
 
   calcBand() {
     let len = (this.data[0] && this.data[0].length) || 2;
-    this.band = this.dimensions.width / (len - 1);
+    const conf = this.axisConfig;
+    this.band = (this.dimensions.width - this.transValue(conf.itemWidth)) / (len - 1);
   }
 
   renderLine() {
@@ -222,6 +224,7 @@ class XAxis extends Chart {
     }
     this.ctx.textAlign = textAlign;
     this.ctx.textBaseline = 'top';
+    this.ctx.font = this.font;
     this.ctx.fillText(text, x + index * this.band, labelY);
     this.ctx.restore();
   }
@@ -237,6 +240,7 @@ class XAxis extends Chart {
     if (typeof xAxis.label.format === 'function') {
       text = xAxis.label.format(text);
     }
+    this.ctx.font = this.font;
     let labelWidth = this.ctx.measureText(text).width;
     labelWidth += this.transValue(10);
     let labelHeight = this.transValue(18);
@@ -249,6 +253,7 @@ class XAxis extends Chart {
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(labelX, this.dimensions.y, labelWidth, labelHeight);
     this.ctx.fillStyle = '#fff';
+    this.ctx.font = this.font;
     this.ctx.fillText(text, labelX + labelWidth / 2, this.dimensions.y + labelHeight / 2);
     this.ctx.restore();
   }

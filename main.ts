@@ -38,7 +38,9 @@ class D2G extends Chart {
     this.wrap = wrap;
     this.canvas = c;
     this.ctx = c.getContext('2d');
-    this.ctx.font = opts.font;
+    const font = opts.font.replace(/(\d+)/, (m) => this.transValue(+m));
+    this.ctx.font = font;
+    this.font = font;
     const canvasWidth = this.transValue(opts.width);
     const canvasHeight = this.transValue(opts.height);
     c.setAttribute('width', canvasWidth + 'px');
@@ -253,7 +255,8 @@ class D2G extends Chart {
       ctx: this.ctx,
       config: this.config,
       chartInfo: this.chartInfo,
-      wrap: this.wrap
+      wrap: this.wrap,
+      font: this.font
     };
   }
 

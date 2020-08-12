@@ -27,10 +27,11 @@ class YAxis extends Chart {
   }
 
   init(c) {
-    const { canvas, ctx, config, chartInfo } = c;
+    const { canvas, ctx, config, chartInfo, font } = c;
     this.canvas = canvas;
     this.ctx = ctx;
     this.chartInfo = chartInfo;
+    this.font = font;
     this.setConfig(config);
   }
 
@@ -60,6 +61,7 @@ class YAxis extends Chart {
       if (yAxis.label.show) {
         const labelWidths = this.labels.map(v => {
           const t = v.formated !== undefined ? v.formated : v.label;
+          this.ctx.font = this.font;
           return this.ctx.measureText(t).width;
         });
         width += max(labelWidths) || 0;
@@ -253,6 +255,7 @@ class YAxis extends Chart {
     } else {
       this.ctx.fillStyle = yAxis.label.color;
     }
+    this.ctx.font = this.font;
     this.ctx.fillText(label.formated || label.label, x, point.y);
     this.ctx.restore();
   }
@@ -267,6 +270,7 @@ class YAxis extends Chart {
     if (typeof yAxis.label.format === 'function') {
       text = yAxis.label.format(value);
     }
+    this.ctx.font = this.font;
     let labelWidth = this.ctx.measureText(text).width;
     labelWidth += this.transValue(10);
     let labelHeight = this.transValue(18);
@@ -285,6 +289,7 @@ class YAxis extends Chart {
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(labelX, labelY, labelWidth, labelHeight);
     this.ctx.fillStyle = '#fff';
+    this.ctx.font = this.font;
     this.ctx.fillText(text, labelX + labelWidth / 2, labelY + labelHeight / 2);
     this.ctx.restore();
   }

@@ -18,11 +18,12 @@ class Pie extends Chart {
   }
 
   init(c) {
-    const { canvas, ctx, config, chartInfo } = c;
+    const { canvas, ctx, config, chartInfo, font } = c;
     this.canvas = canvas;
     this.ctx = ctx;
     this.chartInfo = chartInfo;
     this.setConfig(config);
+    this.font = font;
   }
 
   setConfig(c = {}) {
@@ -130,6 +131,7 @@ class Pie extends Chart {
       sign = -1;
     }
     let labelPositionXRange = [];
+    this.ctx.font = this.font;
     let textWidth = this.ctx.measureText(data.label).width;
     if (sign > 0) {
       labelPositionXRange = [labelX, labelX + textWidth];
@@ -197,6 +199,7 @@ class Pie extends Chart {
     this.ctx.fillStyle = data.color || colors.black;
     this.ctx.textAlign = sign > 0 ? 'start' : 'end';
     this.ctx.textBaseline = 'middle';
+    this.ctx.font = this.font;
     this.ctx.fillText(data.label, endTextPoint.x, endTextPoint.y);
     this.ctx.restore();
   }

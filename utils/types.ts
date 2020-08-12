@@ -86,6 +86,7 @@ export interface XAxis {
   label?: AxisLabel;
   tick?: AxisTick;
   padding?: Padding;
+  itemWidth?: number;
 }
 
 export interface YAxis {

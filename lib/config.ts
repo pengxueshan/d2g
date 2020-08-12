@@ -4,7 +4,7 @@ export default {
   type: '',
   width: 300,
   height: 300,
-  font: '12pt',
+  font: '12px serif',
   window: 0,
   sort: true,
   sortKey: 'date',
@@ -29,6 +29,7 @@ export default {
     mode: 'outside', // inside
     scalable: true,
     key: 'date',
+    itemWidth: 0,
     line: {
       show: true,
       color: colors.black,

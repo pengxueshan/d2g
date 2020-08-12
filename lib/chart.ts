@@ -9,6 +9,7 @@ class Chart extends EventEmitter {
   ratio = 1;
   textLineHeight = 12;
   fontSize = 12;
+  font = '12px serif';
   wrap = null;
   canvas = null;
   ctx: CanvasRenderingContext2D = null;
@@ -23,12 +24,13 @@ class Chart extends EventEmitter {
   range = [0, 0];
   band = 0;
 
-  constructor({ font = '12pt' } = {}) {
+  constructor({ font = '12px serif' } = {}) {
     super();
     this.id = v4();
     this.ratio = window.devicePixelRatio || 1;
     const fontSize = parseInt(font.match(/\d+/).join(), 10);
-    this.fontSize = fontSize;
+    this.fontSize = this.transValue(fontSize);
+    this.font = font.replace(/(\d+)/, (m) => this.transValue(+m) + '');
     this.textLineHeight = this.transValue(fontSize);
   }
 

@@ -33,11 +33,12 @@ class Line extends Chart {
   }
 
   init(c) {
-    const { wrap, canvas, ctx, config, chartInfo } = c;
+    const { wrap, canvas, ctx, config, chartInfo, font } = c;
     this.wrap = wrap;
     this.canvas = canvas;
     this.ctx = ctx;
     this.chartInfo = chartInfo;
+    this.font = font;
     this.setConfig(config);
   }
 
@@ -168,13 +169,13 @@ class Line extends Chart {
       const key = this.xAxis[index].axisConfig.key;
       const { low, open, close, high, pclose } = data;
       const value = data[key];
-      const barWidth = this.xAxis[0].band * 0.3;
+      const barWidth = this.transValue(this.xAxis[index].axisConfig.itemWidth);
       let x = this.xAxis[0].point(line, value, false, key).x;
-      if (dataIndex === 0) {
-        x += barWidth / 2;
-      } else if (dataIndex === line.length - 1) {
-        x -= barWidth / 2;
-      }
+      // if (dataIndex === 0) {
+      //   x += barWidth / 2;
+      // } else if (dataIndex === line.length - 1) {
+      //   x -= barWidth / 2;
+      // }
       const lowY = this.yAxis[0].point(line, low, true).y;
       const highY = this.yAxis[0].point(line, high, true).y;
       const openY = this.yAxis[0].point(line, open, true).y;
@@ -182,15 +183,15 @@ class Line extends Chart {
       const [min, max] = minmax([openY, closeY]);
       this.ctx.save();
       this.ctx.beginPath();
-      this.ctx.moveTo(x - barWidth / 2, min);
-      this.ctx.lineTo(x + barWidth / 2, min);
-      this.ctx.lineTo(x + barWidth / 2, max);
-      this.ctx.lineTo(x - barWidth / 2, max);
-      this.ctx.lineTo(x - barWidth / 2, min);
-      this.ctx.moveTo(x, highY);
+      this.ctx.moveTo(x, min);
+      this.ctx.lineTo(x + barWidth, min);
+      this.ctx.lineTo(x + barWidth, max);
+      this.ctx.lineTo(x, max);
       this.ctx.lineTo(x, min);
-      this.ctx.moveTo(x, max);
-      this.ctx.lineTo(x, lowY);
+      this.ctx.moveTo(x + barWidth / 2, highY);
+      this.ctx.lineTo(x + barWidth / 2, min);
+      this.ctx.moveTo(x + barWidth / 2, max);
+      this.ctx.lineTo(x + barWidth / 2, lowY);
       let strokeStyle = 'red';
       if (close < pclose) {
         strokeStyle = 'green';
