@@ -43,6 +43,9 @@ const chart = new D2G(
       yGrid: {
         show: true,
       },
+      xGrid: {
+        show: true
+      },
       lines: [{type: 'kline', area: {show: false}}],
     },
   },

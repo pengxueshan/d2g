@@ -10,13 +10,6 @@ import { ChartType } from '../utils/chart';
 class YAxis extends Chart {
   type = ChartType.yAxis;
   data = [];
-  dimensions = {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0
-  };
-  prevDimensions = null;
   labels = [];
   range = [];
   axisConfig: YAxisConfig = {};
@@ -24,15 +17,6 @@ class YAxis extends Chart {
   constructor(config) {
     super();
     this.init(config);
-  }
-
-  init(c) {
-    const { canvas, ctx, config, chartInfo, font } = c;
-    this.canvas = canvas;
-    this.ctx = ctx;
-    this.chartInfo = chartInfo;
-    this.font = font;
-    this.setConfig(config);
   }
 
   setConfig(c = {}) {
@@ -113,8 +97,23 @@ class YAxis extends Chart {
     const yAxis = this.axisConfig;
     let [min, max] = minmax(_.flatten(this.data), yAxis.key);
     const total = max - min;
-    min = min - total * yAxis.dataPadding;
-    max = max + total * yAxis.dataPadding;
+    let dataPaddingTop;
+    let dataPaddingBottom;
+    if (yAxis.dataPadding.top < 1) {
+      dataPaddingTop = total * yAxis.dataPadding.top;
+    } else {
+      dataPaddingTop = yAxis.dataPadding.top;
+    }
+    if (yAxis.dataPadding.bottom < 1) {
+      dataPaddingBottom = total * yAxis.dataPadding.bottom;
+    } else {
+      dataPaddingBottom = yAxis.dataPadding.bottom;
+    }
+    min = min - dataPaddingBottom;
+    max = max + dataPaddingTop;
+    if (typeof yAxis.dataPadding.start === 'number') {
+      min = yAxis.dataPadding.start;
+    }
     this.range = [min, max];
     const num = yAxis.tick.num < 2 ? 2 : yAxis.tick.num;
     const interval = (max - min) / (num - 1);

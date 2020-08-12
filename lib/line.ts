@@ -1,8 +1,5 @@
 import _ from 'lodash';
 import Chart from './chart';
-import pick from '../utils/pick';
-import XAxis from './xaxis';
-import YAxis from './yaxis';
 import { Line as LineType } from '../utils/types';
 import { ChartType } from '../utils/chart';
 import minmax from '../utils/minmax';
@@ -12,15 +9,6 @@ import max from '../utils/max';
 class Line extends Chart {
   type = ChartType.line;
   data = [];
-  xAxis: Array<XAxis> = null;
-  yAxis: Array<YAxis> = null;
-  dimensions = {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0
-  };
-  prevDimensions = null;
   horizonLine = null;
   verticalLine = null;
   lineConfig: LineType = {}
@@ -30,16 +18,6 @@ class Line extends Chart {
     this.xAxis = xAxis;
     this.yAxis = yAxis;
     this.init(config);
-  }
-
-  init(c) {
-    const { wrap, canvas, ctx, config, chartInfo, font } = c;
-    this.wrap = wrap;
-    this.canvas = canvas;
-    this.ctx = ctx;
-    this.chartInfo = chartInfo;
-    this.font = font;
-    this.setConfig(config);
   }
 
   setConfig(c = {}) {
@@ -53,31 +31,6 @@ class Line extends Chart {
   }
 
   formatData(data) {
-  }
-
-  calcDimensions() {
-    let arr = [];
-    let { width, height, ...rest } = this.chartInfo;
-    let keys = Object.keys(rest);
-    for (let i = 0; i < keys.length; i++) {
-      let key = keys[i];
-      if (key !== this.id) {
-        arr.push(this.chartInfo[key]);
-      }
-    }
-    let xarr = arr.filter(d => d.x !== undefined);
-    xarr.sort((a, b) => a.x - b.x);
-    xarr = xarr.map(v => [v.x, v.x + v.width]);
-    const xd = pick(xarr, 0, width);
-    this.dimensions.x = xd[0];
-    this.dimensions.width = xd[1] - xd[0];
-    let yarr = arr.filter(d => d.y !== undefined);
-    yarr.sort((a, b) => a.y - b.y);
-    yarr = yarr.map(v => [v.y, v.x + v.height]);
-    const yd = pick(yarr, 0, height);
-    this.dimensions.y = yd[0];
-    this.dimensions.height = yd[1] - yd[0];
-    this.render();
   }
 
   renderLine() {
@@ -350,20 +303,10 @@ class Line extends Chart {
     this.render();
   };
 
-  render() {
-    const { x, y, width, height } = this.prevDimensions || this.dimensions;
-    this.ctx.clearRect(x, y, width, height);
+  renderChart() {
     this.renderGrid();
     this.renderLine();
-    this.yAxis.forEach(axis => {
-      if (axis.axisConfig.mode === 'inside') {
-        axis.render();
-      }
-    });
-    this.prevDimensions = { ...this.dimensions };
   }
-
-  // render = _.debounce(this._render, 300);
 }
 
 export default Line;

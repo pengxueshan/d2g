@@ -98,8 +98,14 @@ export interface YAxis {
   label?: AxisLabel;
   tick?: AxisTick;
   padding?: Padding;
-  dataPadding?: number;
+  dataPadding?: DataPadding;
   key?: string | Array<string>;
+}
+
+interface DataPadding {
+  top?: number;
+  bottom?: number;
+  start?: number;
 }
 
 interface AxisLine {

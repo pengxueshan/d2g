@@ -64,7 +64,11 @@ export default {
     padding: {
       left: 5
     },
-    dataPadding: 0.1,
+    dataPadding: {
+      top: 0.1,
+      bottom: 0.1,
+      start: ''
+    },
     label: {
       show: true,
       color: colors.black, // or function

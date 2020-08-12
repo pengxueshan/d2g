@@ -8,28 +8,12 @@ import { ChartType } from '../utils/chart';
 class XAxis extends Chart {
   type = ChartType.xAxis;
   data = [];
-  dimensions = {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0
-  };
-  prevDimensions = null;
   band = 0;
   axisConfig: XAxisConfig = {};
 
   constructor(config) {
     super();
     this.init(config);
-  }
-
-  init(c) {
-    const { canvas, ctx, config, chartInfo, font } = c;
-    this.canvas = canvas;
-    this.ctx = ctx;
-    this.chartInfo = chartInfo;
-    this.font = font;
-    this.setConfig(config);
   }
 
   setConfig(c = {}) {
@@ -151,7 +135,7 @@ class XAxis extends Chart {
     this.bus((data, index) => {
       this.ctx.save();
       this.ctx.beginPath();
-      const x = this.dimensions.x + index * this.band;
+      const x = this.dimensions.x + index * this.band + this.transValue(this.axisConfig.itemWidth / 2);
       this.ctx.moveTo(x, y);
       this.ctx.lineTo(x, y + height);
       this.ctx.strokeStyle = c.color;
@@ -178,7 +162,7 @@ class XAxis extends Chart {
     const { x, y, width } = this.dimensions;
     this.ctx.save();
     this.ctx.beginPath();
-    let tickX = x + index * this.band;
+    let tickX = x + index * this.band + this.transValue(xAxis.itemWidth / 2);
     if (tickX <= x) {
       tickX += this.transValue(1 / 2);
     } else if (tickX >= x + width) {
@@ -225,7 +209,7 @@ class XAxis extends Chart {
     this.ctx.textAlign = textAlign;
     this.ctx.textBaseline = 'top';
     this.ctx.font = this.font;
-    this.ctx.fillText(text, x + index * this.band, labelY);
+    this.ctx.fillText(text, x + index * this.band + this.transValue(xAxis.itemWidth / 2), labelY);
     this.ctx.restore();
   }
 

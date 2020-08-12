@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import config from './lib/config';
 import Chart from './lib/chart';
+import EventTypes from './utils/events';
+import { ChartType } from './utils/chart';
 import Pie from './lib/pie';
 import Line from './lib/line';
 import XAxis from './lib/xaxis';
 import YAxis from './lib/yaxis';
-import EventTypes from './utils/events';
-import { ChartType } from './utils/chart';
+import Bar from './lib/bar';
 
 class D2G extends Chart {
   wrap = null;
@@ -77,6 +78,9 @@ class D2G extends Chart {
       case 'line':
         this.initLine(config);
         break;
+      case 'bar':
+        this.initBar(config);
+        break;
     }
     this.chart.forEach(c => {
       c.on(EventTypes.UPDATE_CHART_INFO, this.handleUpdateChartInfo);
@@ -107,6 +111,31 @@ class D2G extends Chart {
       return g;
     });
     this.chart.push(new Line({
+      config: c.line,
+      ...rest
+    }, xCharts, yCharts));
+  }
+
+  initBar(config) {
+    const { config: c, ...rest } = config;
+    const { xAxis, yAxis } = c;
+    const xCharts = xAxis.map(x => {
+      const g = new XAxis({
+        config: x,
+        ...rest
+      });
+      this.chart.push(g);
+      return g;
+    });
+    const yCharts = yAxis.map(y => {
+      const g = new YAxis({
+        config: y,
+        ...rest
+      });
+      this.chart.push(g);
+      return g;
+    });
+    this.chart.push(new Bar({
       config: c.line,
       ...rest
     }, xCharts, yCharts));
