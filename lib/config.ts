@@ -109,5 +109,11 @@ export default {
         },
       }
     ]
+  },
+  bar: {
+    label: {
+      show: false
+    },
+    color: []
   }
 }

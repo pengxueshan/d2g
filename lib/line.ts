@@ -5,6 +5,7 @@ import { ChartType } from '../utils/chart';
 import minmax from '../utils/minmax';
 import min from '../utils/min';
 import max from '../utils/max';
+import { gcolor } from '../utils/gcolor';
 
 class Line extends Chart {
   type = ChartType.line;
@@ -97,15 +98,13 @@ class Line extends Chart {
         if (conf.area.color.length < 2) {
           this.ctx.fillStyle = conf.area.color[0];
         } else {
-          const grd = this.ctx.createLinearGradient(
-            0,
-            minY,
-            0,
-            this.dimensions.y + this.dimensions.height
-          );
-          let interval = 1 / (conf.area.color.length - 1);
-          conf.area.color.forEach((color, index) => {
-            grd.addColorStop(interval * index, color);
+          const grd = gcolor({
+            context: this.ctx,
+            color: conf.area.color,
+            x1: 0,
+            y1: minY,
+            x2: 0,
+            y2: this.dimensions.y + this.dimensions.height
           });
           this.ctx.fillStyle = grd;
         }
