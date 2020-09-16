@@ -1,11 +1,11 @@
 {
   "name": "d2g",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
-  "main": "dist/main.js",
+  "main": "lib/main.js",
   "scripts": {
     "test": "parcel ./test/index.html",
-    "build": "parcel build ./main.ts"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -24,9 +24,10 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.158",
+    "@types/node": "^14.10.2",
     "typescript": "^3.9.7"
   },
   "files": [
-    "dist/*"
+    "lib/*"
   ]
 }

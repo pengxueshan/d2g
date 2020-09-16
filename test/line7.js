@@ -1,4 +1,4 @@
-import D2G from '../main.ts';
+import D2G from '../src/main.ts';
 import datas from './data.json';
 import _ from 'lodash';
 

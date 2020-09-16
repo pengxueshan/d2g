@@ -1,4 +1,4 @@
-import D2G from '../main.ts';
+import D2G from '../src/main.ts';
 
 const wrap = document.createElement('div');
 const header = document.createElement('h2');

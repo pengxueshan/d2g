@@ -39,9 +39,9 @@ class Bar extends Chart {
       const xAxis = this.xAxis[index];
       const yAxis = this.yAxis[index];
       const xKey = xAxis.axisConfig.key;
-      let yKey = yAxis.axisConfig.key;
+      let yKey = yAxis.axisConfig.key as string;
       if (typeof yKey !== 'string') {
-        yKey = yKey.toString();
+        yKey = `${yKey}`;
       }
       const barWidth = this.transValue(xAxis.axisConfig.itemWidth);
       data.forEach(d => {

@@ -1,4 +1,4 @@
-export default function sum(values: Iterable<object | number>, key: string | undefined) {
+export default function sum(values: Array<object | number>, key: string | undefined) {
   let total = 0;
   for (const v of values) {
     if (typeof v === 'object') {

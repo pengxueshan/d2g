@@ -1,4 +1,4 @@
-import D2G from '../main.ts';
+import D2G from '../src/main.ts';
 import kline from './kline.json';
 
 const wrap = document.createElement('div');
