@@ -29,6 +29,7 @@ class Chart extends EventEmitter {
   band = 0;
   xAxis: Array<XAxis> = null;
   yAxis: Array<YAxis> = null;
+  axisConfig = null;
 
   constructor({ font = '12px serif' } = {}) {
     super();
@@ -150,7 +151,10 @@ class Chart extends EventEmitter {
     let yDis;
     if (this.band) {
       const index = datas.findIndex(d => d[key] === value);
-      const delta = this.axisConfig.itemCenter ? this.transValue(this.axisConfig.itemWidth / 2) : 0;
+      let delta = 0;
+      if (this.axisConfig) {
+        delta = this.transValue(this.axisConfig.itemWidth / 2);
+      }
       xDis = yDis = this.band * index + delta;
     } else {
       const percent = (value - this.range[0]) / (this.range[1] - this.range[0]);
