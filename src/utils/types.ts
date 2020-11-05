@@ -67,6 +67,7 @@ interface AxisTick {
 interface Grid {
   show: boolean;
   color: string;
+  dashLine: boolean;
 }
 
 interface Padding {

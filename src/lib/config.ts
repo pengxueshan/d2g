@@ -87,10 +87,12 @@ export default {
     xGrid: {
       show: false,
       color: colors.gray, // or function
+      dashLine: false,
     },
     yGrid: {
       show: false,
       color: colors.gray, // or function
+      dashLine: false,
     },
     cross: {
       show: false

@@ -43,6 +43,7 @@ const chart = new D2G(
       yGrid: {
         show: true,
         color: '#ddd',
+        dashLine: true,
       },
       lines: [
         {

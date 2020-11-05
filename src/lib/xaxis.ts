@@ -137,6 +137,9 @@ class XAxis extends Chart {
       this.ctx.beginPath();
       const x = this.dimensions.x + index * this.band + this.transValue(this.axisConfig.itemWidth / 2);
       this.ctx.moveTo(x, y);
+      if (c.dashLine) {
+        this.ctx.setLineDash([8, 8]);
+      }
       this.ctx.lineTo(x, y + height);
       this.ctx.strokeStyle = c.color;
       this.ctx.stroke();

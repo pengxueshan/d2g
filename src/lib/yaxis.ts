@@ -173,6 +173,9 @@ class YAxis extends Chart {
       this.ctx.save();
       this.ctx.beginPath();
       this.ctx.moveTo(x, p.y);
+      if (c.dashLine) {
+        this.ctx.setLineDash([8, 8]);
+      }
       this.ctx.lineTo(x + width, p.y);
       this.ctx.strokeStyle = c.color;
       this.ctx.stroke();
