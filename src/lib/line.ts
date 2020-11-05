@@ -52,6 +52,33 @@ class Line extends Chart {
     });
   }
 
+  renderDot(x, y, conf, data) {
+    const { color, label } = conf.dot;
+    let { radius, width } = conf.dot;
+    radius = this.transValue(radius);
+    width = this.transValue(width);
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, radius - width / 2, 0, 2 * Math.PI);
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = width;
+    this.ctx.fillStyle = '#fff';
+    this.ctx.stroke();
+    this.ctx.fill();
+    if (label.show) {
+      let key = this.yAxis[0].axisConfig.key;
+      if (Array.isArray(key)) {
+        key = 'value';
+      }
+      const v = data[key];
+      this.ctx.fillStyle = '#000';
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'bottom';
+      this.ctx.fillText(v, x, y - this.transValue(10));
+    }
+    this.ctx.restore();
+  }
+
   renderNaturalLine(data, index, conf) {
     const points = data.map(d => {
       let x = 0;
@@ -70,8 +97,8 @@ class Line extends Chart {
       return { x, y };
     });
     const xpoints = points.map(p => p.x);
-    const ypoints = points.map(p => p.y);
     const px = this.getCtrlPoint2(xpoints);
+    const ypoints = points.map(p => p.y);
     const py = this.getCtrlPoint2(ypoints);
     this.ctx.save();
     this.ctx.beginPath();
@@ -89,10 +116,17 @@ class Line extends Chart {
     this.ctx.strokeStyle = conf.color;
     this.ctx.lineWidth = this.transValue(conf.width);
     this.ctx.stroke();
+    if (conf.dot.show) {
+      points.forEach((p, index) => {
+        this.renderDot(p.x, p.y, conf, data[index]);
+      });
+    }
     if (conf.area.show) {
-      const { x, y, width, height } = this.dimensions;
-      this.ctx.lineTo(x + width, y + height);
-      this.ctx.lineTo(x, y + height);
+      const { y, height } = this.dimensions;
+      const firstPoint = points[0];
+      const lastPoint = points[points.length - 1];
+      this.ctx.lineTo(lastPoint.x, y + height);
+      this.ctx.lineTo(firstPoint.x, y + height);
       this.ctx.closePath();
       if (Array.isArray(conf.area.color)) {
         if (conf.area.color.length < 2) {

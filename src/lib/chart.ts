@@ -50,7 +50,7 @@ class Chart extends EventEmitter {
     this.setConfig(config);
   }
 
-  setConfig(c = {}) {}
+  setConfig(c = {}) { }
 
   transValue(v, isToReal = true) {
     if (isToReal) {
@@ -96,13 +96,18 @@ class Chart extends EventEmitter {
     this.render();
   }
 
-  value(point, isReverse = false) {
+  value(point, isReverse = false, roundType = 'round') {
     const { x, y } = point;
     if (this.band) {
+      const roundMethod = {
+        'round': Math.round,
+        'ceil': Math.ceil,
+        'floor': Math.floor
+      }[roundType];
       const xDis = x - this.dimensions.x;
-      let xIndex = Math.round(xDis / this.band);
+      let xIndex = roundMethod(xDis / this.band);
       const yDis = y - this.dimensions.y;
-      let yIndex = Math.round(yDis / this.band);
+      let yIndex = roundMethod(yDis / this.band);
       if (xIndex < 0) {
         xIndex = 0;
       } else if (xIndex > this.data[0].length - 1) {
@@ -145,7 +150,8 @@ class Chart extends EventEmitter {
     let yDis;
     if (this.band) {
       const index = datas.findIndex(d => d[key] === value);
-      xDis = yDis = this.band * index;
+      const delta = this.axisConfig.itemCenter ? this.transValue(this.axisConfig.itemWidth / 2) : 0;
+      xDis = yDis = this.band * index + delta;
     } else {
       const percent = (value - this.range[0]) / (this.range[1] - this.range[0]);
       xDis = this.dimensions.width * percent;
@@ -163,7 +169,7 @@ class Chart extends EventEmitter {
     };
   }
 
-  renderChart() {}
+  renderChart() { }
 
   render() {
     const { x, y, width, height } = this.prevDimensions || this.dimensions;

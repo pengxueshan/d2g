@@ -87,6 +87,7 @@ export interface XAxis {
   tick?: AxisTick;
   padding?: Padding;
   itemWidth?: number;
+  itemCenter?: boolean;
 }
 
 export interface YAxis {
@@ -130,7 +131,8 @@ interface Lines {
   width?: number;
   area?: Area;
   type?: string;
-  singleLabel?: SingleLabel
+  singleLabel?: SingleLabel;
+  dot?: LineDot;
 }
 
 interface SingleLabel {
@@ -141,4 +143,17 @@ interface SingleLabel {
 interface Area {
   show?: boolean;
   color?: string;
+}
+
+interface LineDot {
+  show?: boolean;
+  color?: string,
+  radius?: number,
+  width?: number,
+  label?: LineDotLabel,
+}
+
+interface LineDotLabel {
+  show?: boolean,
+  color?: string,
 }

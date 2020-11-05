@@ -30,6 +30,7 @@ export default {
     scalable: true,
     key: 'date',
     itemWidth: 0,
+    itemCenter: false,
     line: {
       show: true,
       color: colors.black,
@@ -106,6 +107,16 @@ export default {
         area: {
           show: true,
           color: ['rgba(255,0,0,0.6)', 'rgba(255,0,0,0.3)']
+        },
+        dot: {
+          show: false,
+          color: colors.black,
+          radius: 4,
+          width: 2,
+          label: {
+            show: false,
+            color: colors.black,
+          },
         },
       }
     ]

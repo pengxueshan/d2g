@@ -294,6 +294,33 @@ class D2G extends Chart {
     this.ctx.clearRect(0, 0, width, height);
   }
 
+  getChartDimensions() {
+    for (let i = 0; i < this.chart.length; i++) {
+      if (this.chart[i] instanceof XAxis || this.chart[i] instanceof YAxis) {
+        continue;
+      } else {
+        return this.chart[i].dimensions;
+      }
+    }
+  }
+
+  getXAxis() {
+    for (let i = 0; i < this.chart.length; i++) {
+      if (this.chart[i] instanceof XAxis) {
+        return this.chart[i];
+      } else {
+        continue;
+      }
+    }
+  }
+
+  getXRange([x1, x2]) {
+    const xAxisChart = this.getXAxis();
+    const min = xAxisChart.value({x: x1, y: 0}, false, 'ceil');
+    const max = xAxisChart.value({x: x2, y: 0}, false, 'floor');
+    return [min.xIndex, max.xIndex];
+  }
+
   render() {
     if (this.chart.length) {
       // this.clear();

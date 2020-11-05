@@ -185,10 +185,12 @@ class XAxis extends Chart {
     const xAxis = this.axisConfig;
     const { x, y } = this.dimensions;
     let textAlign: CanvasTextAlign = 'center';
-    if (index === 0) {
-      textAlign = 'left';
-    } else if (index === this.data[0].length - 1) {
-      textAlign = 'right';
+    if (!xAxis.itemWidth || !xAxis.itemCenter) {
+      if (index === 0) {
+        textAlign = 'left';
+      } else if (index === this.data[0].length - 1) {
+        textAlign = 'right';
+      }
     }
     this.ctx.save();
     let fillStyle;
