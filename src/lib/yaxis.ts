@@ -96,7 +96,8 @@ class YAxis extends Chart {
   calcLabels() {
     const yAxis = this.axisConfig;
     let [min, max] = minmax(_.flatten(this.data), yAxis.key);
-    const total = max - min;
+    let total = max - min;
+    total = total || 1;
     let dataPaddingTop;
     let dataPaddingBottom;
     if (yAxis.dataPadding.top < 1) {

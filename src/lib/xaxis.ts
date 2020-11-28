@@ -89,6 +89,7 @@ class XAxis extends Chart {
 
   calcBand() {
     let len = (this.data[0] && this.data[0].length) || 2;
+    len = len < 2 ? 2 : len;
     const conf = this.axisConfig;
     this.band = (this.dimensions.width - this.transValue(conf.itemWidth)) / (len - 1);
   }
