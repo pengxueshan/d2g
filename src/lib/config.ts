@@ -99,7 +99,7 @@ export default {
     },
     lines: [
       {
-        type: '', // kline, singlex, singley
+        type: '', // kline, singlex, singley, natural
         color: colors.black,
         width: 1,
         singleLabel: {

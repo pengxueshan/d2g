@@ -47,6 +47,7 @@ const chart = new D2G(
       },
       lines: [
         {
+          type: 'line',
           color: '#205AF4',
           area: {show: false},
           dot: {
@@ -69,5 +70,3 @@ chart.setData([
     {value: 4, date: '2015'},
   ],
 ]);
-console.log(chart.getChartDimensions());
-console.log(chart.getXRange([35, 290]));

@@ -6,6 +6,7 @@ import minmax from '../utils/minmax';
 import min from '../utils/min';
 import max from '../utils/max';
 import { gcolor } from '../utils/gcolor';
+import config from './config';
 
 class Line extends Chart {
   type = ChartType.line;
@@ -96,10 +97,6 @@ class Line extends Chart {
       }
       return { x, y };
     });
-    const xpoints = points.map(p => p.x);
-    const px = this.getCtrlPoint2(xpoints);
-    const ypoints = points.map(p => p.y);
-    const py = this.getCtrlPoint2(ypoints);
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.moveTo(points[0].x, points[0].y);
@@ -108,9 +105,20 @@ class Line extends Chart {
       this.ctx.lineTo(points[1].x, points[1].y);
       minY = Math.min(minY, points[1].y);
     } else if (points.length > 2) {
-      for (var i0 = 0, i1 = 1; i1 < points.length; ++i0, ++i1) {
-        this.ctx.bezierCurveTo(px[0][i0], py[0][i0], px[1][i0], py[1][i0], xpoints[i1], ypoints[i1]);
-        minY = Math.min(minY, py[0][i0], py[1][i0], ypoints[i1]);
+      if (conf.type === 'line') {
+        for (var i = 0; i < points.length; i++) {
+          this.ctx.lineTo(points[i].x, points[i].y);
+          minY = Math.min(minY, points[i].y);
+        }
+      } else {
+        const xpoints = points.map(p => p.x);
+        const px = this.getCtrlPoint2(xpoints);
+        const ypoints = points.map(p => p.y);
+        const py = this.getCtrlPoint2(ypoints);
+        for (var i0 = 0, i1 = 1; i1 < points.length; ++i0, ++i1) {
+          this.ctx.bezierCurveTo(px[0][i0], py[0][i0], px[1][i0], py[1][i0], xpoints[i1], ypoints[i1]);
+          minY = Math.min(minY, py[0][i0], py[1][i0], ypoints[i1]);
+        }
       }
     }
     this.ctx.strokeStyle = conf.color;
