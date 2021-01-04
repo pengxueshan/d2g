@@ -20,7 +20,7 @@ const chart = new D2G(
           // num: 2,
           show: false,
         },
-        itemWidth: 30,
+        itemWidth: 80,
         itemCenter: true,
       },
     ],
@@ -63,10 +63,10 @@ const chart = new D2G(
 );
 chart.setData([
   [
-    {value: 1, date: '2011'},
-    {value: 3, date: '2012'},
-    {value: 2, date: '2013'},
-    {value: 5, date: '2014'},
-    {value: 4, date: '2015'},
+    {value: 1, date: '2011/09/01'},
+    {value: 3, date: '2012/09/01'},
+    {value: 2, date: '2013/09/01'},
+    {value: 5, date: '2014/09/01'},
+    {value: 4, date: '2015/09/01'},
   ],
 ]);
